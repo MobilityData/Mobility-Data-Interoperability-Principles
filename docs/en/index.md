@@ -34,7 +34,7 @@ The coauthors are responsible for:
 The coauthor coalition is:
 {%  include "coalition.md"  %}
 
---8<-- "includes/co-authors-logo-grid.html"
+--8<-- "../../assets/co-authors-logo-grid.html"
 
 ---
 

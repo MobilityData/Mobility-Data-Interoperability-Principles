@@ -18,7 +18,7 @@ More than ever, meeting the needs of travelers requires the complete interoperab
 **[Transportation technology companies](definitions.md#transportation_technology_company)** can:  
 
 - Develop new and innovative approaches to serving the needs of [mobility service providers](definitions.md#mobility_service_provider) and riders;  
-- Use widely-adopted [open standards](definitions.md#open_standards) for the transmission of all data that allows transit agencies, other [mobility service providers](definitions.md#mobility_service_provider) and travelers to meet their needs;  
+- Use widely-adopted [open standards](definitions.md#open_standard) for the transmission of all data that allows transit agencies, other [mobility service providers](definitions.md#mobility_service_provider) and travelers to meet their needs;  
 - Easily integrate with other companies’ hardware and software to send and receive planning, scheduling, and operating data; and  
 - Quickly identify and resolve data issues with their products.  
 

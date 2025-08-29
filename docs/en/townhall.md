@@ -7,7 +7,7 @@ The co-author coalition held a Town Hall meeting on Thursday, December 9 at 11 a
 - transportation system managers (DOTs and other regulators of transportation infrastructure), and  
 - the public.  
 
-[You can now watch the full meeting here](resources.md#meeting-recordings).
+[You can now watch the full meeting here](resources.md).
 
 The session was designed to provide answers to common questions that the co-authors have received about MDIP and to give an opportunity for additional discussion about near-term actions that can be taken to achieve the vision laid out in MDIP. Regardless if you are already among the co-signers or if this is your first time hearing about the project, this session will help you figure out where you fit in to MDIP.
 

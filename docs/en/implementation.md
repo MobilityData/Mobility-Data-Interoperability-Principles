@@ -21,4 +21,4 @@ While MDIP's most immediate goal is building and demonstrating the consensus for
 
 ### \>> [Mobility providers](definitions.md#mobility_service_provider) and [transportation system managers](definitions.md#transportation_system_manager) shall
 
-- [x]  Require compliance with the Principles in procurement of any [transit technology components](definitions.md#transit_technology_component).  
+- [x]  Require compliance with the Principles in procurement of any transit technology components.  

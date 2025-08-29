@@ -144,7 +144,7 @@ Fixed-route scheduling system functions:
 - Manage assignment of vehicles and drivers
 - Optionally, importing information from agency databases for these purposes
 
-![The image depicts a flowchart with five boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into two boxes on the right side, "CAD/AVL system (ODS)" and "trip planners (GTFS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow.](img/fixed_route_scheduling_system.png "fixed route scheduling system")
+![The image depicts a flowchart with five boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into two boxes on the right side, "CAD/AVL system (ODS)" and "trip planners (GTFS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow.](../../assets/images/fixed_route_scheduling_system.png "fixed route scheduling system")
 
 Demand-response scheduling system functions include the following:
 
@@ -155,7 +155,7 @@ Demand-response scheduling system functions include the following:
 
 Note that there is often no CAD/AVL system separate from the demand-response software system other than the AVL hardware, unlike fixed route transit service where these two systems are often separated.
 
-![The image depicts a flowchart with six boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into three boxes on the right side, "Reporting system (TIDES)", "Trip planners (GTFS-OnDemand)", and "Brokerages (TDS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow and "Brokerages" which is a light blue box connecting from the "scheduling system" by a dashed arrow.](img/demand_response_scheduling_system.png "demand response scheduling system")
+![The image depicts a flowchart with six boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into three boxes on the right side, "Reporting system (TIDES)", "Trip planners (GTFS-OnDemand)", and "Brokerages (TDS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow and "Brokerages" which is a light blue box connecting from the "scheduling system" by a dashed arrow.](../../assets/images/demand_response_scheduling_system.png "demand response scheduling system")
 
 #### Fixed-route scheduling system requirements
 
@@ -190,7 +190,7 @@ Fixed route CAD/AVL system functions:
 - Output real-time information regarding the status of the transit system
 - Optionally, control various downstream onboard or offboard systems
 
-![The image depicts a flowchart with four boxes in three columns, flowing left to right. On the left side is the box "scheduling system (ODS)", flowing into the middle box "CAD/AVL system", which flows into two boxes on the right side, "Reporting system (TIDES)" and "Trip planners (GTFS-RT)". All boxes are dark blue and connected by a solid arrow.](img/fixed_route_cad_avl.png "fixed route cad/avl system")
+![The image depicts a flowchart with four boxes in three columns, flowing left to right. On the left side is the box "scheduling system (ODS)", flowing into the middle box "CAD/AVL system", which flows into two boxes on the right side, "Reporting system (TIDES)" and "Trip planners (GTFS-RT)". All boxes are dark blue and connected by a solid arrow.](../../assets/images/fixed_route_cad_avl.png "fixed route cad/avl system")
 
 #### CAD/AVL system requirements
 
@@ -212,7 +212,7 @@ Reporting system functions:
 - Import schedule and performance data
 - Calculate and display relevant performance statistics
 
-![The image depicts a flowchart with two boxes in two columns, flowing left to right. On the left side is the box "CAD/AVL (TIDES)", which flows into a box on the right side "Reporting system" . All boxes are dark blue and connected by a solid arrow.](img/reporting_system.png "reporting system")
+![The image depicts a flowchart with two boxes in two columns, flowing left to right. On the left side is the box "CAD/AVL (TIDES)", which flows into a box on the right side "Reporting system" . All boxes are dark blue and connected by a solid arrow.](../../assets/images/reporting_system.png "reporting system")
 
 #### Reporting system requirements
 

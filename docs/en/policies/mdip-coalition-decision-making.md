@@ -1,6 +1,6 @@
 # MDIP Coalition Decision-Making
 
-In order to be considered approved by the [MDIP Coalition](../governance.md#mdip-coalition), relevant documents and policies MUST be voted on by at least ⅔ of the [MDIP Coalition](../governance.md#mdip-coalition members) and be approved by ⅔ of the members who choose to vote.
+In order to be considered approved by the [MDIP Coalition](../governance.md#mdip-coalition), relevant documents and policies MUST be voted on by at least ⅔ of the [MDIP Coalition](mdip-coalition-composition.md#coalition-members) and be approved by ⅔ of the members who choose to vote.
 
 ## Process
 

@@ -29,6 +29,32 @@ Over 60 public and private signatories have committed to implementing the Princi
 - [VIA Metropolitan Transit San Antonio](https://www.viainfo.net/)
 - [Washington State Department of Transportation (WSDOT) Public Transportation Division](https://wsdot.wa.gov/)
 
+## Building the site locally
+
+1. In Terminal, change the directory to one where you wish to build the site.
+1. Ensure you have an up-to-date version of pip: 
+   - Linux: `pip install pip` or `pip install --upgrade pip`
+   - macOS: `pip3 install pip` or `pip3 install --upgrade pip`
+1. Clone this repository:
+   - `git clone https://github.com/MobilityData/Mobility-Data-Interoperability-Principles`
+1. Change the directory to the cloned repository, and create & enable a Python virtual environment:
+   - `python3 -m venv venv`
+   - `source venv/bin/activate`
+1. Have [`requirements.txt`](requirements.txt) installed:
+   - Linux: `pip install --force-reinstall -r requirements.txt`
+   - macOS: `pip3 install --force-reinstall -r requirements.txt`
+1. Have [Material for MkDocs Insiders](https://squidfunk.github.io/mkdocs-material/insiders/`) installed. Substitute `${GH_TOKEN}` with MobilityData's access token:
+   - Linux: `pip install git+https://${GH_TOKEN}@github.com/squidfunk/mkdocs-material-insiders.git`
+   - macOS: `pip3 install git+https://${GH_TOKEN}@github.com/squidfunk/mkdocs-material-insiders.git`
+1. To run the site locally (command defined in `MakeFile`):
+   - `make serve`
+   - Then each language will have it's own address:
+     - English: `http://127.0.0.1:8000/`
+1. To build the site locally only (command defined in `MakeFile`):
+   - `make build`
+1. Deactivate the Python virtual environment when done:
+   - `deactivate`
+
 ## License
 
 This code in this repository is licensed under [Apache 2.0](./LICENSE).

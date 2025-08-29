@@ -42,7 +42,7 @@ The following roles for individuals, groups and organizations are defined as par
 
 ### MDIP Coalition
 
-Public sector and nonprofit organizations that are committed to realizing the vision of the Principles and serve as the governing body for the [MDIP Project](definitions.md#mdip_project). If no [MDIP Manager](#mdip-manager) is selected, the MDIP Coalition MUST be responsible for their activities as well.
+Public sector and nonprofit organizations that are committed to realizing the vision of the Principles and serve as the governing body for the MDIP Project. If no [MDIP Manager](#mdip-manager) is selected, the MDIP Coalition MUST be responsible for their activities as well.
 
 ### MDIP Coalition Chair
 
@@ -65,8 +65,8 @@ Individuals or organizations who have asked to be publicly recognized for their 
 
 ### MDIP Manager
 
-Chosen by the [MDIP Coalition](#mdip-coalition), this individual or organization MUST oversee daily management of the [MDIP Project](definitions#mdip_project) at the direction of the [MDIP Coalition](#mdip-coalition)in pursuit of the [MDIP Project Roadmap](definitions.md#mdip_project_roadmap) consistent with available resources, including:
-Identifying, pursuing, and managing human and monetary resources available to the [MDIP Project](definitions#mdip_project) (e.g. grant opportunities);
+Chosen by the [MDIP Coalition](#mdip-coalition), this individual or organization MUST oversee daily management of the MDIP Project at the direction of the [MDIP Coalition](#mdip-coalition)in pursuit of the [MDIP Project Roadmap](definitions.md#mdip_project_roadmap) consistent with available resources, including:
+Identifying, pursuing, and managing human and monetary resources available to the MDIP Project (e.g. grant opportunities);
 
 - Building and demonstrating consensus that the mobility industry should be organized around interoperable technology in alignment with the Principles;
 - Maintaining a high-profile in relevant venues and conduct targeted direct outreach which establishes the MDIP Project as the leader in the mobility data interoperability space;
@@ -75,8 +75,8 @@ Identifying, pursuing, and managing human and monetary resources available to th
 - Facilitating a decision-making process of the [MDIP Coalition](#mdip-coalition) to develop and regularly update the [MDIP Project Roadmap](definitions.md#mdip_project_roadmap).
 - Depending on the [MDIP Project Roadmap](definitions.md#mdip_project_roadmap), and available resources, the MDIP Manager MAY:
 - Identify, commit and or manage resources towards an Open Standards Project;
-- Regularly update the [MobilityDataverse](definitions.md#mobilitydataverse);
-- Develop and regularly update the [Open Standards Project Template](definitions.md#open-standards-project-template); and
+- Regularly update the [MobilityDataverse](definitions.md#mobility_dataverse);
+- Develop and regularly update the [Open Standards Project Template](definitions.md#open_standard); and
 - Promote, expand, and regularly update the [Procurement Resource](definitions.md#mdip_procurement_resource).
 - The MDIP Manager MUST identify and work with the [MDIP Coalition Chair](#mdip-coalition-chair) to manage any organizational conflicts of interest.  The MDIP Manager MUST NOT engage in any activity in conflict with the Principles
 

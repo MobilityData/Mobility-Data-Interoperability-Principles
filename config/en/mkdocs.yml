@@ -1,0 +1,132 @@
+site_name: "Mobility Data Interoperability Principles"
+site_url: https://interoperablemobility.org/
+repo_url: https://github.com/interoperable-mobility/principles
+repo_name: Mobility Data Interoperability Principles
+docs_dir: ../../docs/en       # Where to find the English markdown files
+site_dir: ../../generated/    # Where to put the English HTML files
+# edit_uri: edit/main/docs
+
+theme:
+  name: material
+  language: en
+  custom_dir: ../../overrides/
+  features:
+    - navigation.expand
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - toc.integrate
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: amber
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: amber
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  logo: assets/images/logo.png
+  favicon: assets/images/favicon.png
+
+plugins:
+  - search:
+      lang: 
+        - en
+  - awesome-pages
+  - privacy:
+      links_attr_map:
+        target: _blank
+  # - macros
+
+extra:
+  analytics:
+    provider: google
+    property: G-E6EQB94P7M
+  consent:
+    title: Cookie Consent
+    description: >-
+      We use cookies to track visits, stored anonymously. With your consent, you're helping us to make our documentation better. See our <a href="https://mobilitydata.org/privacy-policy/">Privacy Policy</a>.
+    actions:
+        - accept
+        - reject
+        - manage
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/MobilityData
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/mobilitydata
+    - icon: fontawesome/brands/slack
+      link: https://share.mobilitydata.org/slack
+  # alternate:
+  #   - name: English
+  #     link: /
+  #     lang: en
+
+extra_javascript:
+  - https://unpkg.com/mermaid@8.5.0/dist/mermaid.min.js
+
+extra_css:
+  - https://use.fontawesome.com/releases/v5.13.0/css/all.css
+  - assets/stylesheets/additional.css
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - codehilite:
+      linenums: true
+  - def_list
+  - pymdownx.inlinehilite
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
+  - pymdownx.smartsymbols
+  - meta
+  - toc:
+      # insert a blank space before the character
+      permalink: " ¶"
+      toc_depth: 2
+  - smarty
+  - pymdownx.details
+  - pymdownx.snippets:
+      auto_append:
+        - docs/en/includes/glossary.md
+  - abbr
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+    - Principles: index.md
+    - About: about.md
+    - Implementation: implementation.md
+    - Support: support.md
+    - Procurement: procurement.md
+    - Resources: resources.md
+    - Governance:
+      - Structure: governance.md
+      - Policies:
+          - Code of Conduct: policies/code-of-conduct.md
+          - Digital Access: policies/digital-access.md
+          - Coalition Composition: policies/mdip-coalition-composition.md
+          - Coalition Decision-Making: policies/mdip-coalition-decision-making.md
+          - Management: policies/management.md
+          - Openness + Transparency: policies/openness-transparency.md
+    - Glossary: definitions.md
+
+not_in_nav: |
+  admin_draft_review.md
+  coalition.md
+  cosignatories.md
+  public_draft_review.md
+  townhall.md
+  vision.md
