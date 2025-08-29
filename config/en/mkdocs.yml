@@ -8,6 +8,9 @@ site_dir: ../../generated/    # Where to put the English HTML files
 
 theme:
   name: material
+  font:
+    text: Poppins
+    code: SF Mono
   language: en
   custom_dir: ../../overrides/
   features:
@@ -71,8 +74,8 @@ extra:
   # - https://unpkg.com/mermaid@8.5.0/dist/mermaid.min.js
 
 extra_css:
+  - /assets/stylesheets/additional.css
   - https://use.fontawesome.com/releases/v5.13.0/css/all.css
-  - assets/stylesheets/additional.css
 
 markdown_extensions:
   - attr_list

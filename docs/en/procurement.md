@@ -144,7 +144,30 @@ Fixed-route scheduling system functions:
 - Manage assignment of vehicles and drivers
 - Optionally, importing information from agency databases for these purposes
 
-![The image depicts a flowchart with five boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into two boxes on the right side, "CAD/AVL system (ODS)" and "trip planners (GTFS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow.](../../assets/images/fixed_route_scheduling_system.png "fixed route scheduling system")
+<div role="img" aria-labelledby="etl-desc" style="zoom: 1.25; text-align: center;">
+``` mermaid
+graph LR
+  classDef darkblue fill:#4288d7,stroke-width:0px,font-weight:bold,font-size:24px;
+  classDef lightblue fill:#d5e1f2,stroke-width:0px,font-weight:bold,font-size:24px;
+
+  A("Agency staff") ---> C("Sheduling system");
+  B("Agency database") -..-> C;
+  C ---> D("CAD/AVL system (ODS)");
+  C ---> E("Trip planners (GTFS)");
+
+  class A,C,D,E darkblue
+  class B lightblue
+
+  linkStyle 0 stroke:#000000,stroke-width:2px
+  linkStyle 1 stroke:#000000,stroke-width:2px
+  linkStyle 2 stroke:#000000,stroke-width:2px
+  linkStyle 3 stroke:#000000,stroke-width:2px
+
+```
+<p id="etl-desc" class="sr-only">
+The image depicts a flowchart with five boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into two boxes on the right side, "CAD/AVL system (ODS)" and "trip planners (GTFS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow.
+</p>
+</div>
 
 Demand-response scheduling system functions include the following:
 
@@ -155,7 +178,31 @@ Demand-response scheduling system functions include the following:
 
 Note that there is often no CAD/AVL system separate from the demand-response software system other than the AVL hardware, unlike fixed route transit service where these two systems are often separated.
 
-![The image depicts a flowchart with six boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into three boxes on the right side, "Reporting system (TIDES)", "Trip planners (GTFS-OnDemand)", and "Brokerages (TDS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow and "Brokerages" which is a light blue box connecting from the "scheduling system" by a dashed arrow.](../../assets/images/demand_response_scheduling_system.png "demand response scheduling system")
+<div role="img" aria-labelledby="etl-desc-2" style="zoom: 1.25; text-align: center;">
+``` mermaid
+graph LR
+  classDef darkblue fill:#4288d7,stroke-width:0px,font-weight:bold,font-size:24px;
+  classDef lightblue fill:#d5e1f2,stroke-width:0px,font-weight:bold,font-size:24px;
+
+  A("Agency staff") ---> C("Sheduling system");
+  B("Agency database") -..-> C;
+  C ---> D("Reporting system (TIDES)");
+  C ---> E("Trip planners (GTFS On-Demand)");
+  C -..-> F("Brokerages (TDS)");
+
+  class A,C,D,E darkblue
+  class B,F lightblue
+
+  linkStyle 0 stroke:#000000,stroke-width:2px
+  linkStyle 1 stroke:#000000,stroke-width:2px
+  linkStyle 2 stroke:#000000,stroke-width:2px
+  linkStyle 3 stroke:#000000,stroke-width:2px
+
+```
+<p id="etl-desc-2" class="sr-only">
+The image depicts a flowchart with six boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into three boxes on the right side, "Reporting system (TIDES)", "Trip planners (GTFS-OnDemand)", and "Brokerages (TDS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow and "Brokerages" which is a light blue box connecting from the "scheduling system" by a dashed arrow.
+</p>
+</div>
 
 #### Fixed-route scheduling system requirements
 
@@ -190,7 +237,26 @@ Fixed route CAD/AVL system functions:
 - Output real-time information regarding the status of the transit system
 - Optionally, control various downstream onboard or offboard systems
 
-![The image depicts a flowchart with four boxes in three columns, flowing left to right. On the left side is the box "scheduling system (ODS)", flowing into the middle box "CAD/AVL system", which flows into two boxes on the right side, "Reporting system (TIDES)" and "Trip planners (GTFS-RT)". All boxes are dark blue and connected by a solid arrow.](../../assets/images/fixed_route_cad_avl.png "fixed route cad/avl system")
+<div role="img" aria-labelledby="etl-desc-3" style="zoom: 1.25; text-align: center;">
+``` mermaid
+graph LR
+  classDef darkblue fill:#4288d7,stroke-width:0px,font-weight:bold,font-size:24px;
+
+  A("Scheduling system (ODS)") ---> B("CAD/AVL System");
+  B ---> C("Reporting system (TIDES)");
+  B ---> D("Trip planners (GTFS On-Demand)");
+
+  class A,B,C,D darkblue
+
+  linkStyle 0 stroke:#000000,stroke-width:2px
+  linkStyle 1 stroke:#000000,stroke-width:2px
+  linkStyle 2 stroke:#000000,stroke-width:2px
+
+```
+<p id="etl-desc-3" class="sr-only">
+The image depicts a flowchart with four boxes in three columns, flowing left to right. On the left side is the box "scheduling system (ODS)", flowing into the middle box "CAD/AVL system", which flows into two boxes on the right side, "Reporting system (TIDES)" and "Trip planners (GTFS-RT)". All boxes are dark blue and connected by a solid arrow.
+</p>
+</div>
 
 #### CAD/AVL system requirements
 
@@ -212,7 +278,22 @@ Reporting system functions:
 - Import schedule and performance data
 - Calculate and display relevant performance statistics
 
-![The image depicts a flowchart with two boxes in two columns, flowing left to right. On the left side is the box "CAD/AVL (TIDES)", which flows into a box on the right side "Reporting system" . All boxes are dark blue and connected by a solid arrow.](../../assets/images/reporting_system.png "reporting system")
+<div role="img" aria-labelledby="etl-desc-4" style="zoom: 1.25; text-align: center; color: white; font-family: Poppins">
+``` mermaid
+graph LR
+  classDef darkblue fill:#4288d7,stroke-width:0px,font-weight:bold,font-size:24px;
+
+  A("CAD/AVL (TIDES)") ---> B("Reporting system");
+
+  class A,B darkblue
+
+  linkStyle 0 stroke:#000000,stroke-width:2px
+
+```
+<p id="etl-desc-4" class="sr-only">
+The image depicts a flowchart with two boxes in two columns, flowing left to right. On the left side is the box "CAD/AVL (TIDES)", which flows into a box on the right side "Reporting system" . All boxes are dark blue and connected by a solid arrow.
+</p>
+</div>
 
 #### Reporting system requirements
 
