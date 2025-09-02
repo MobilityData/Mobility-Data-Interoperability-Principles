@@ -2,7 +2,7 @@
 
 Cosign the principles to support an interoperable vision for the future of transit technology.
 
-[Contact us](mailto://interoperablemobility@gmail.com) to be added as a:
+[Contact us](mailto://mdip@mobilitydata.org) to be added as a:
 
 - **Cosignatory**: Open to any individual or organization committed to supporting the Mobility Data Interoperability Principles and their implementation.
 - **Coalition Member**: Open public sector and nonprofit organizations that are committed to realizing the vision of the Principles and serve as the governing body.
