@@ -40,6 +40,6 @@ The coauthor coalition is:
 
 **Does your organization support interoperability?**
 
-*[Contact us](mailto:interoperablemobility@gmail.com) to add your name to the [list of cosignatories](support.md) or apply to become part of the Coalition of co-authors.*
+*[Contact us](mailto:mdip@mobilitydata.org) to add your name to the [list of cosignatories](support.md) or apply to become part of the Coalition of co-authors.*
 
 ---
