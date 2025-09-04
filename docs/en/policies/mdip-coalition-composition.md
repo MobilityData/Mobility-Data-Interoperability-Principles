@@ -38,7 +38,7 @@ Members MAY be removed from the [MDIP Coalition](../governance.md#mdip-coalition
 
 ## Coalition Members
 
-{%  include "coalition.md"  %}
+--8<-- "docs/en/coalition.md"
 
 ## Document Changelog
 
