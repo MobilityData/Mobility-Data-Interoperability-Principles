@@ -10,9 +10,7 @@ Cosign the principles to support an interoperable vision for the future of trans
 Additional information about eligibility, roles, and duties can be found in our [governance documentation](governance.md).
 
 ## Cosignatories
-
-{% include 'cosignatories.md' %}
+--8<-- "docs/en/cosignatories.md"
 
 ## Coalition
-
-{% include 'coalition.md' %}
+--8<-- "docs/en/coalition.md"
