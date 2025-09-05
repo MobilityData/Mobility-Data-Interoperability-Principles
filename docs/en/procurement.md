@@ -152,7 +152,7 @@ graph LR
 
   A("Agency staff") ---> C("Sheduling system");
   B("Agency database") -..-> C;
-  C ---> D("CAD/AVL system (ODS)");
+  C ---> D("CAD/AVL system (TODS)");
   C ---> E("Trip planners (GTFS)");
 
   class A,C,D,E darkblue
@@ -165,7 +165,7 @@ graph LR
 
 ```
 <p id="etl-desc" class="sr-only">
-The image depicts a flowchart with five boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into two boxes on the right side, "CAD/AVL system (ODS)" and "trip planners (GTFS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow.
+The image depicts a flowchart with five boxes in three columns, flowing left to right. On the left side are the boxes "agency staff" and "agency database", both flowing into the middle box "scheduling system", which flows into two boxes on the right side, "CAD/AVL system (TODS)" and "trip planners (GTFS)". All boxes are dark blue and connected by a solid arrow, except for "agency database" which is a light blue box connecting to the "scheduling system" by a dashed arrow.
 </p>
 </div>
 
@@ -211,7 +211,7 @@ Fixed-route scheduling systems should meet the following requirements to be cons
 | |
 | :--- |
 | **Input/Output** |
-| The scheduling system shall receive, process, store, and export customer-generated data and derived data, free from additional costs or restrictions. <br />The scheduling system shall receive, store, provide access to, and make available via an appropriate API, data in the most recent version of the following open standards including their best practices:<ul><li>Rider-facing schedule data in GTFS Schedule; and</li><li>As-operated data in the Operational Data Standard (ODS). </li></ul>Best practices shall be defined as both should statements in the standard itself as well as official best practices documents such as the [GTFS Schedule Best Practices](https://gtfs.org/schedule/best-practices/). <br />The scheduling system shall be enabled to receive the following inputs both through an ad-hoc import or by fetching using an API. <ul><li>Driver/operator rosters and associated data necessary to assign drivers/operators to runs in a Well-documented Data Format.</li><li>Vehicle inventory and associated data necessary to assign vehicles to blocks in a Well-documented Data Format. </li></ul>Input data schemas and APIs shall be consistent with any other relevant open standards |
+| The scheduling system shall receive, process, store, and export customer-generated data and derived data, free from additional costs or restrictions. <br />The scheduling system shall receive, store, provide access to, and make available via an appropriate API, data in the most recent version of the following open standards including their best practices:<ul><li>Rider-facing schedule data in GTFS Schedule; and</li><li>As-operated data in the Operational Data Standard (TODS). </li></ul>Best practices shall be defined as both should statements in the standard itself as well as official best practices documents such as the [GTFS Schedule Best Practices](https://gtfs.org/schedule/best-practices/). <br />The scheduling system shall be enabled to receive the following inputs both through an ad-hoc import or by fetching using an API. <ul><li>Driver/operator rosters and associated data necessary to assign drivers/operators to runs in a Well-documented Data Format.</li><li>Vehicle inventory and associated data necessary to assign vehicles to blocks in a Well-documented Data Format. </li></ul>Input data schemas and APIs shall be consistent with any other relevant open standards |
 | **Built-in Enforcement + Monitoring** |
 | The scheduling system shall include a mechanism to ensure that exported data is consistent with the above requirements using relevant canonical validators.  Data which would not pass the above requirements using relevant canonical validators shall require an explicit override to export.  Validation reports for each export shall be transparent to the customer and provide a course of action to remedy. <br />Validation errors which are the result of scheduling software errors and cannot be remedied by the customer shall be automatically reported to Customer and Contractor and are subject to Performance Minimums and Recovery Time Objectives.  |
 
@@ -242,7 +242,7 @@ Fixed route CAD/AVL system functions:
 graph LR
   classDef darkblue fill:#4288d7,stroke-width:0px,font-weight:bold,font-size:24px;
 
-  A("Scheduling system (ODS)") ---> B("CAD/AVL System");
+  A("Scheduling system (TODS)") ---> B("CAD/AVL System");
   B ---> C("Reporting system (TIDES)");
   B ---> D("Trip planners (GTFS On-Demand)");
 
@@ -254,7 +254,7 @@ graph LR
 
 ```
 <p id="etl-desc-3" class="sr-only">
-The image depicts a flowchart with four boxes in three columns, flowing left to right. On the left side is the box "scheduling system (ODS)", flowing into the middle box "CAD/AVL system", which flows into two boxes on the right side, "Reporting system (TIDES)" and "Trip planners (GTFS-RT)". All boxes are dark blue and connected by a solid arrow.
+The image depicts a flowchart with four boxes in three columns, flowing left to right. On the left side is the box "scheduling system (TODS)", flowing into the middle box "CAD/AVL system", which flows into two boxes on the right side, "Reporting system (TIDES)" and "Trip planners (GTFS-RT)". All boxes are dark blue and connected by a solid arrow.
 </p>
 </div>
 
