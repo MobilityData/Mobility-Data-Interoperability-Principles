@@ -2,10 +2,15 @@ name: Lint and style checks
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# Disabled the other triggers do to part of workflow is not working, will investigate later:
+#      Run pre-commit/action@v2.0.0
+#      install pre-commit
+#      Error: getCacheEntry failed: <h2>Our services aren't available right now</h2><p>We're working to restore all services as soon as possible. Please check back soon.</p>0yfa6aAAAAAAwdZzfWtlpQ7MU6zq78uD6QkwyQUEyMDMwMTA1MDUxAEVkZ2U=
+#
+#  push:
+#    branches: [ main ]
+#  pull_request:
+#    branches: [ main ]
 
 jobs:
   lint:
