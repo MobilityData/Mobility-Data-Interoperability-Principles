@@ -32,9 +32,9 @@ The coauthors are responsible for:
 - building the movement for mobility data interoperability.
 
 The coauthor coalition is:
-{%  include "coalition.md"  %}
+--8<-- "docs/en/coalition.md"
 
---8<-- "../../assets/co-authors-logo-grid.html"
+--8<-- "overrides/assets/co-authors-logo-grid.html"
 
 ---
 
