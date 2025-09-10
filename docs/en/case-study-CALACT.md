@@ -1,0 +1,11 @@
+# Procurement Case Study: CALACT
+
+In 2023, the [Oregon Department of Transportation (ODOT)](https://www.oregon.gov/odot/pages/index.aspx) and [Washington State Department of Transportation (WSDOT)](https://wsdot.wa.gov/) worked with project management partner [California Association for Coordinated Transportation (CALACT)](https://calact.org/) to release a request for proposals (RFP) for a regional transit data analysis and planning tool. The DOTs wanted to leverage well-known existing standards like the [General Transit Feed Specification (GTFS)](https://gtfs.org/), [OpenStreetMap (OSM)](https://www.openstreetmap.org/) to support transit planners in visualizing the multi-state transit network. But they also wanted the new platform to be able to incorporate emerging and future standards as well. Further, they knew the platform had to be capable of evolving as planning processes and the capabilities of other applications changed.
+
+The coalition worked together to develop a custom software development [scope of work](https://drive.google.com/file/d/1koVx9PSuAHJRl1mV_9YIzCXJ_JR0KAF4/view) that identified clear and measurable goals followed by additional project intentions. Three of the project intentions were about working style and key project approach assumptions. But the final intention covered a lot of additional specifics in a brief sentence: “Adhere to the [Mobility Data Interoperability Principles](https://www.interoperablemobility.org/).”
+
+“The Mobility Data Interoperability Principles aren’t only about the common transit data software products that are ubiquitous at all agencies, like scheduling or CAD/AVL systems”, says Thomas Craig of the WSDOT Public Transportation Division. “MDIP is also about building new tools and systems, and maintaining business practices within our organizations, that benefit from and reinforce the open data ecosystem that benefits all transit software.” 
+
+After finalizing the procurement in Spring 2024, the project is proceeding with development. TIDES and other emerging data standards are in the long-term project plan, and MDIP will continue to serve as a framework to support ongoing decision making as the project and partnership evolve.
+
+--8<-- "includes/glossary.md"
