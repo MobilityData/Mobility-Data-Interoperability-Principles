@@ -110,6 +110,12 @@ The following subjects are important considerations when ensuring a successful i
 
 Definitions which support the terms used in the procurement language throughout this document can be copied from [Definitions](definitions.md) which offers a rigorous and regularly updated set of terms as defined by the MDIP co-authors. Only the terms used in the procurement document need to be defined.
 
+## Case Studies
+Here are some example case studies of procurements and projects that have explicitly leveraged the Mobility Data Interoperability Principles:
+- [Hopelink's Find A Ride project] (case-study-SUMC.md)
+- [MnDOT's Mobility-as-a-Service program] (case-study-MnDOT.md)
+- [CALACT's Network Analysis Tool] (case-study-CALACT.md)
+
 ## System Requirements
 
 System requirements will vary greatly based on the technology components included in the procurement scope. The system requirements to support interoperability described in sections below should be adapted to the particular needs of the agency procuring the system. Specific requirements can be found below in the following categories:
