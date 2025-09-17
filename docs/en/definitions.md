@@ -137,11 +137,11 @@ In developing the Principles and related resources, the MDIP coalition has adopt
 <a name="mdip_respository"></a>
 **MDIP Repository**
 :    The version control repository containing the MDIP Website; currently located at:
-[`https://github.com/interoperable-mobility/principles`]
+[`https://github.com/interoperable-mobility/principles`](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles)
 
 <a name="mdip_repository_organization"></a>
 **MDIP Repository Organization**
-:    The version control organization which contains the MDIP Repository. Currently located at: [`https://github.com/interoperable-mobility`]
+:    The version control organization which contains the MDIP Repository. Currently located at: [`https://github.com/MobilityData/Mobility-Data-Interoperability-Principles`](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles)
 
 <a name="mdip_resources"></a>
 **MDIP Resources**
