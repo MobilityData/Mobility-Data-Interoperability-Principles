@@ -108,7 +108,7 @@ In developing the Principles and related resources, the MDIP coalition has adopt
 
 <a name="mdip_definitions"></a>
 **MDIP Definitions**
-:    Terms of art as officially defined by the MDIP Community and approved by the MDIP Coalition. Currently documented (here) at: [https://www.interoperablemobility.org/definitions/]
+:    Terms of art as officially defined by the MDIP Community and approved by the MDIP Coalition. Currently documented (here) at: [https://www.interoperablemobility.org/definitions/](https://www.interoperablemobility.org/definitions/)
 
 <a name="mdip_documentation"></a>
 **MDIP Documentation**
@@ -116,15 +116,15 @@ In developing the Principles and related resources, the MDIP coalition has adopt
 
 <a name="mdip_governance"></a>
 **MDIP Governance**
-:    Who and how decisions are made about the scope and direction of the MDIP Project as approved by the Co-author Coalition and documented at: ….
+:    Who and how decisions are made about the scope and direction of the MDIP Project as approved by the Co-author Coalition.
 
 <a name="mdip_files"></a>
 **MDIP Files**
-:    The digital files located within the MDIP Shared Folder including – but not limited to – drafts of various MDIP Resources, MDIP Documentation and MDIP Community Assets as well as digital assets used to manage the day-to-day aspects of the MDIP Project and further its mission.
+:    The digital files located within the MDIP Shared Folder including — but not limited to — drafts of various MDIP Resources, MDIP Documentation and MDIP Community Assets as well as digital assets used to manage the day-to-day aspects of the MDIP Project and further its mission.
 
 <a name="mdip_implementation_responsibilities"></a>
 **MDIP Implementation Responsibilities**
-:    The directive list of responsibilities for implementing the Principles as approved by the MDIP Coalition. Currently documented at: [https://www.interoperablemobility.org/implementation/]
+:    The directive list of responsibilities for implementing the Principles as approved by the MDIP Coalition. Currently documented at: [https://www.interoperablemobility.org/implementation/](https://www.interoperablemobility.org/implementation/)
 
 <a name="mdip_project_roadmap"></a>
 **MDIP Project Roadmap**
@@ -137,17 +137,17 @@ In developing the Principles and related resources, the MDIP coalition has adopt
 <a name="mdip_respository"></a>
 **MDIP Repository**
 :    The version control repository containing the MDIP Website; currently located at:
-[`https://github.com/interoperable-mobility/principles`](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles)
+[https://github.com/interoperable-mobility/principles](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles)
 
 <a name="mdip_repository_organization"></a>
 **MDIP Repository Organization**
-:    The version control organization which contains the MDIP Repository. Currently located at: [`https://github.com/MobilityData/Mobility-Data-Interoperability-Principles`](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles)
+:    The version control organization which contains the MDIP Repository. Currently located at: [https://github.com/MobilityData/Mobility-Data-Interoperability-Principles](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles)
 
 <a name="mdip_resources"></a>
 **MDIP Resources**
-:    Products developed by the MDIP Community and approved by the Co-author Coalition in support of the Principles.  Examples include:
-     - Procurement Resource
-     - Mobility Dataverse (forthcoming)
+:    Products developed by the MDIP Community and approved by the Co-author Coalition in support of the Principles.</br></br>Examples include:</br>
+     - Procurement Resource</br>
+     - Mobility Dataverse (forthcoming)</br>
      - Open Standards Project Template (forthcoming)
 
 <a name="mdip_shared_folder"></a>
@@ -156,7 +156,7 @@ In developing the Principles and related resources, the MDIP coalition has adopt
 
 <a name="mdip_website"></a>
 **MDIP Website**
-:    Web location and website content stored on the MDIP Repository and available at [`http://interoperablemobility.org`]
+:    Web location and website content stored on the MDIP Repository and available at [https://interoperablemobility.org](https://interoperablemobility.org)
 
 <a name="mobility_dataverse"></a>
 **Mobility Dataverse**
