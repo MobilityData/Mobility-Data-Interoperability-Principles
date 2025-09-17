@@ -69,6 +69,7 @@ extra:
 
 extra_javascript:
   - https://unpkg.com/mermaid@8.5.0/dist/mermaid.min.js
+  - assets/javascript/fix-md-search.js
 
 extra_css:
   - https://use.fontawesome.com/releases/v5.13.0/css/all.css
