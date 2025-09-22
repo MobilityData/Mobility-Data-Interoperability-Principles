@@ -11,4 +11,4 @@ The [Mobility Data Interoperability Principles](http://interoperablemobility.org
 
 ---
 
-**Media contact:** [Scott Frazier](mailto:scott.frazier@dot.ca.gov)  
+**Media contact:** [MobilityData](mailto:mdip@mobilitydata.org)  
