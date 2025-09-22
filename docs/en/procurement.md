@@ -112,9 +112,9 @@ Definitions which support the terms used in the procurement language throughout 
 
 ## Case Studies
 Here are some example case studies of procurements and projects that have explicitly leveraged the Mobility Data Interoperability Principles:
-- [Hopelink's Find A Ride project] (case-study-SUMC.md)
-- [MnDOT's Mobility-as-a-Service program] (case-study-MnDOT.md)
-- [CALACT's Network Analysis Tool] (case-study-CALACT.md)
+- [Hopelink's Find A Ride project](case-study-SUMC.md)
+- [MnDOT's Mobility-as-a-Service program](case-study-MnDOT.md)
+- [CALACT's Network Analysis Tool](case-study-CALACT.md)
 
 ## System Requirements
 
