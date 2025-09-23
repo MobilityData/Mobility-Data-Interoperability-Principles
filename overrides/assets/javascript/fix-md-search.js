@@ -25,6 +25,4 @@ document.addEventListener('DOMContentLoaded', function() {
   if (searchForm) {
     searchForm.setAttribute('role', 'search');
   }
-  
-  console.log('Accessibility fixes applied to search dialog');
 });
