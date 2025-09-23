@@ -110,7 +110,12 @@ nav:
     - About: about.md
     - Implementation: implementation.md
     - Support: support.md
-    - Procurement: procurement.md
+    - Procurement:
+        - procurement/index.md
+        - Case studies:
+          - procurement/case-studies/CALACT.md
+          - procurement/case-studies/Hopelink.md
+          - procurement/case-studies/MnDOT.md
     - Resources: resources.md
     - Governance:
       - Structure: governance.md

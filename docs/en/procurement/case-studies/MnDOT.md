@@ -9,6 +9,7 @@ In order to ensure maximum data interoperability, MnDOT asked RFP respondents to
 Projects that can include experimental or provisional specifications help move the transit industry towards more data interoperability. Incorporating emerging specifications as a project data standard is an important step towards standards adoption, as example implementation cases are needed to prove specifications utility ahead of broader acceptance. For example, MnDOT’s use of GTFS-Flex on this project by data producers (13 partner agencies) and consumers ([Transit app](https://transitapp.com/) and [MnDOT’s web-based trip planner](https://mntransitplanner.com/#/)) provided [MobilityData](https://mobilitydata.org/), the steward of GTFS, the required use case to call a vote to adopt the Flex extension as part of GTFS. GTFS-Flex was officially adopted as part of GTFS in March 2023.
 
 You can download and review MnDOT's Mobility-as-a-Service RFP and Functional Requirements below:
+
 - [MnDOT MaaS RFP](../../assets/1885 MaaS_RFP FINAL 01292021.docx)
 - [MnDOT MaaS Functional Requirements](../../assets/1885 MaaS_Attachment F - Functional Requirements_121620.xlsx)
 
