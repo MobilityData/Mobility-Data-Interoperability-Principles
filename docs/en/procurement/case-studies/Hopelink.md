@@ -1,6 +1,6 @@
-# Procurement Case Study: SUMC
+# Procurement Case Study: Hopelink
 
-## Hopelink’s Find a Ride Community-Driven Approach to Technology Solutions
+<h2>Hopelink’s Find a Ride Community-Driven Approach to Technology Solutions</h2>
 
 ### Case study by Shared-Use Mobility Center (SUMC)
 
@@ -11,7 +11,8 @@ The trip planner is focused on incorporating specialized transportation side by 
 ### Find a Ride Trip Planning Platform
 ![The image depicts a screenshot of the trip planning page from the Find A Ride application, where the user has selected the menu options to find a trip from one location in South Seattle to another.](../../assets/images/Find_A_Ride_1.png "Find A Ride 1")
 ![The image depicts a screenshot of the trip results page from the Find A Ride application, where the user has access to results including three demand response trips from their origin to destination.](../../assets/images/Find_A_Ride_2.png "Find A Ride 2")
-Credit:  [Find a Ride](https://www.kcmobility.org/ococ) platform. On the landing page riders enter their travel origin, destination, and travel times and are then provided trip planning options.
+
+> Credit: [Find a Ride](https://www.kcmobility.org/ococ) platform. On the landing page riders enter their travel origin, destination, and travel times and are then provided trip planning options.
 
 In addition to leveraging data standards to increase access to specialized transportation services, Find a Ride’s community-driven process makes it unique. The [Mobility Data Interoperability Principles](https://www.interoperablemobility.org/) coalition has published five guiding principles on the importance of open-source data solutions and how agencies can incorporate an open framework in their own communities. Hopelink’s community-driven process for the Find a Ride platform embodies the fifth interoperability principle:
 All individuals and the public should be empowered through high-quality, well-distributed mobility data to find, access, and utilize high-quality mobility options that meet their needs as they see fit, while maintaining their privacy.
@@ -26,7 +27,9 @@ While this level of engagement takes more time and resources, the benefits are f
 Further building on its commitment to Principle 5, Hopelink conducts extensive outreach, collaborates with local tech firms and volunteer groups, and implements initiatives like digital literacy programs to leverage technology for community benefit. Through these efforts, Hopelink’s Find a Ride platform uses technology as a tool to promote self-sufficiency in the community. 
 
 Hopelink played a pivotal role in the creation of nearly two dozen new data feeds for the Washington State Department of Transportation (WSDOT), contributing to the development of the General Transit Feed Specification (GTFS)-Flex.1 GTFS-Flex expands on GTFS, an open-source data standard used by most transit agencies in the U.S. to include demand-responsive transportation and, when available, real-time information for on-demand services. These data standards advance the representation of critical transportation services such as volunteer transportation and non-emergency medical transportation (NEMT). Through travel education and collaboration with various sectors including transportation providers, human services agencies, and healthcare providers, Hopelink strives to ensure a more seamless trip experience. Throughout this process, Hopelink considers the trade-offs of adopting new technology and open-source data solutions–or data specifications and standards–before proceeding.
+
 Open-source data is important in this process. Some of the benefits of using open-source data include: 
+
 - A framework to work from so that Hopelink does not need to reinvent how specific trip data is communicated each time a new mode or provider is added to the platform. 
 - Other platforms can readily digest that information into their own systems, such as Google or Apple Maps, making trip information more accessible.
 - Replicability for other cities interested in creating a similar platform in their own communities. 
