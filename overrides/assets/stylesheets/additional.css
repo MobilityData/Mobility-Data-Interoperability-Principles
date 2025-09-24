@@ -1,6 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Raleway:wght@900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap");
 
+:root  > * {
+  --md-primary-fg-color:        #1B58A4;
+  --md-primary-fg-color--light: #4892ec;
+  --md-primary-fg-color--dark:  #1B58A4;
+}
+
 h1,
 h2,
 h3,
@@ -106,7 +112,7 @@ body[data-md-color-scheme="slate"] .show-dark-mode {
 
 /* Fix navigation tabs contrast */
 .md-tabs__link {
-  color: #000000 !important;
+  color: #ffffff !important;
 }
 
 /* Fix active navigation link */
