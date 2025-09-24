@@ -38,7 +38,7 @@ The following roles for individuals, groups and organizations are defined as par
 |[MDIP Coalition Coordinator](#mdip-coalition-coordinator)| [Thomas Craig](https://github.com/tsherlockcraig), [WS DOT](https://wsdot.com/) |
 |[MDIP Co-signatories](#mdip-co-signatories)| [Co-signatories list](support.md#cosignatories) |
 |[MDIP Manager](#mdip-manager)| [MobilityData](https://mobilitydata.org) |
-|[MDIP Program Manager](#mdip-program-manager)| [Cristhian Hellion](https://github.com/Cristhian-HA), [MobilityData](https://mobilitydata.org) |
+|[MDIP Program Manager](#mdip-program-manager)| [Elias Cripotos](https://github.com/eliasmbd), [MobilityData](https://mobilitydata.org) |
 
 ### MDIP Coalition
 
