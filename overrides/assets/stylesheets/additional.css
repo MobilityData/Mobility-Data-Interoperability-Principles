@@ -65,6 +65,11 @@ p, a, li {
   font-family: "Poppins", sans-serif;
 }
 
+/* All Hyperlinks Bold */
+a {
+  font-weight: bold;
+}
+
 /* Navigation */
 .md-nav {
   font-family: "Raleway", sans-serif;
