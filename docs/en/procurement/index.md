@@ -1,3 +1,4 @@
+
 # Interoperable Procurement
 
 The purpose of this resource is to document why and how interoperability should be included in a transit technology procurement and provide example language.
@@ -108,7 +109,14 @@ The following subjects are important considerations when ensuring a successful i
 
 ### Definitions
 
-Definitions which support the terms used in the procurement language throughout this document can be copied from [Definitions](definitions.md) which offers a rigorous and regularly updated set of terms as defined by the MDIP co-authors. Only the terms used in the procurement document need to be defined.
+Definitions which support the terms used in the procurement language throughout this document can be copied from [Definitions](../definitions.md) which offers a rigorous and regularly updated set of terms as defined by the MDIP co-authors. Only the terms used in the procurement document need to be defined.
+
+## Case Studies
+Here are some example case studies of procurements and projects that have explicitly leveraged the Mobility Data Interoperability Principles:
+
+- [CALACT's Network Analysis Tool](case-studies/CALACT.md)
+- [Hopelink's Find A Ride project](case-studies/Hopelink.md)
+- [MnDOT's Mobility-as-a-Service program](case-studies/MnDOT.md)
 
 ## System Requirements
 
