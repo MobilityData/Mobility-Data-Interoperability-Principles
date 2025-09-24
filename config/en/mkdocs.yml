@@ -16,20 +16,7 @@ theme:
     - navigation.tabs.sticky
     - toc.integrate
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: blue
-      accent: amber
-      toggle:
-        icon: material/toggle-switch-off-outline
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: blue
-      accent: amber
-      toggle:
-        icon: material/toggle-switch
-        name: Switch to light mode
+    primary: custom
   logo: assets/images/logo.png
   favicon: assets/images/favicon.png
 
