@@ -32,6 +32,7 @@
 - [Interline](https://interline.io)
 - [Ito World](https://www.itoworld.com/)
 - [Jarvus Innovations](https://jarv.us/)
+- [Jawnt](https://www.jawntpass.com)
 - [King County, Washington](https://kingcounty.gov/)
 - [Kuba](https://www.kubapay.com/)
 - Albert Kochaphum, Individual
