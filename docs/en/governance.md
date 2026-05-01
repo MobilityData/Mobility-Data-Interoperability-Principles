@@ -37,7 +37,7 @@ The following roles for individuals, groups and organizations are defined as par
 |[MDIP Coalition Chair](#mdip-coalition-chair)| [Paul Swartz](https://github.com/paulswartz), [MBTA](https://www.mbta.com/) |
 |[MDIP Coalition Coordinator](#mdip-coalition-coordinator)| [Thomas Craig](https://github.com/tsherlockcraig), [WS DOT](https://wsdot.com/) |
 |[MDIP Co-signatories](#mdip-co-signatories)| [Co-signatories list](support.md#cosignatories) |
-|[MDIP Manager](#mdip-manager)| [MobilityData](https://mobilitydata.org) |
+|[MDIP Manager](#mdip-manager)| [MobilityData](https://mobilitydata.org) (per [Memorandum of Understanding (MoU)](https://share.mobilitydata.org/mdipmou)) |
 |[MDIP Program Manager](#mdip-program-manager)| [Carl Fredlund](https://github.com/carlfredl), [MobilityData](https://mobilitydata.org) |
 
 ### MDIP Coalition
@@ -65,7 +65,7 @@ Individuals or organizations who have asked to be publicly recognized for their 
 
 ### MDIP Manager
 
-Chosen by the [MDIP Coalition](#mdip-coalition), this individual or organization MUST oversee daily management of the MDIP Project at the direction of the [MDIP Coalition](#mdip-coalition)in pursuit of the [MDIP Project Roadmap](definitions.md#mdip_project_roadmap) consistent with available resources, including:
+Chosen by the [MDIP Coalition](#mdip-coalition), this individual or organization MUST oversee daily management of the MDIP Project at the direction of the [MDIP Coalition](#mdip-coalition) in pursuit of the [MDIP Project Roadmap](definitions.md#mdip_project_roadmap) consistent with available resources, including:
 Identifying, pursuing, and managing human and monetary resources available to the MDIP Project (e.g. grant opportunities);
 
 - Building and demonstrating consensus that the mobility industry should be organized around interoperable technology in alignment with the Principles;
