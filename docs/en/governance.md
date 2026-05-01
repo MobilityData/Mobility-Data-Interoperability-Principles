@@ -37,7 +37,7 @@ The following roles for individuals, groups and organizations are defined as par
 |[MDIP Coalition Chair](#mdip-coalition-chair)| [Paul Swartz](https://github.com/paulswartz), [MBTA](https://www.mbta.com/) |
 |[MDIP Coalition Coordinator](#mdip-coalition-coordinator)| [Thomas Craig](https://github.com/tsherlockcraig), [WS DOT](https://wsdot.com/) |
 |[MDIP Co-signatories](#mdip-co-signatories)| [Co-signatories list](support.md#cosignatories) |
-|[MDIP Manager](#mdip-manager)| [MobilityData](https://mobilitydata.org) (per [Memorandum of Understanding (MoU)](https://drive.google.com/file/d/1sTzvqn4dXqULYQnoU9P6eY4twfN6mq--/view?usp=sharing)) |
+|[MDIP Manager](#mdip-manager)| [MobilityData](https://mobilitydata.org) (per [Memorandum of Understanding (MoU)](https://share.mobilitydata.org/mdipmou)) |
 |[MDIP Program Manager](#mdip-program-manager)| [Carl Fredlund](https://github.com/carlfredl), [MobilityData](https://mobilitydata.org) |
 
 ### MDIP Coalition
