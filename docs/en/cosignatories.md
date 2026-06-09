@@ -26,6 +26,7 @@
 - [Garnet Consulting](http://www.garnetconsultingpdx.com)
 - [Dr. Mark Hickman](https://researchers.uq.edu.au/researcher/2972), University of Queensland\*
 - [Hevo Power](http://hevopower.com)
+- [HNTB](https://www.hntb.com)
 - Sean Holman, Individual
 - Tiffany Huang, Individual
 - [IBI Group](https://www.ibigroup.com)
