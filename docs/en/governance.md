@@ -38,7 +38,7 @@ The following roles for individuals, groups and organizations are defined as par
 |[MDIP Coalition Coordinator](#mdip-coalition-coordinator)| Janet Geissler, [Michigan DOT](https://www.michigan.gov/mdot) |
 |[MDIP Co-signatories](#mdip-co-signatories)| [Co-signatories list](support.md#cosignatories) |
 |[MDIP Manager](#mdip-manager)| [MobilityData](https://mobilitydata.org) (per [Memorandum of Understanding (MoU)](https://share.mobilitydata.org/mdipmou)) |
-|[MDIP Program Manager](#mdip-program-manager)| [Carl Fredlund](https://github.com/carlfredl), [MobilityData](https://mobilitydata.org) |
+|[MDIP Program Manager](#mdip-program-manager)| [Etienne Pichot Damon](https://github.com/etienne0101), [MobilityData](https://mobilitydata.org) |
 
 ### MDIP Coalition
 
