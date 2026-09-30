@@ -38,9 +38,6 @@ source of truth and the place to contribute: each specification and each
 organization is one Markdown file with YAML front matter, and "Suggest a
 change" on a specification's page opens that file in GitHub's editor.
 
-The section is unlisted for now: it is not in the nav bar, the site search or
-the sitemap, and its pages carry `<meta name="robots" content="noindex">`.
-
 | Path | What it is |
 | --- | --- |
 | `data/specifications/<id>.md` | One specification: fields in front matter, then `# Description`. |
