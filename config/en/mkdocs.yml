@@ -20,6 +20,9 @@ theme:
   logo: assets/images/logo.png
   favicon: assets/images/favicon.png
 
+hooks:
+  - ../../hooks/specifications.py
+
 plugins:
   - search:
       lang: 
@@ -57,10 +60,12 @@ extra:
 extra_javascript:
   - https://unpkg.com/mermaid@8.5.0/dist/mermaid.min.js
   - assets/javascript/fix-md-search.js
+  - assets/javascript/specifications.js
 
 extra_css:
   - https://use.fontawesome.com/releases/v5.13.0/css/all.css
   - assets/stylesheets/additional.css
+  - assets/stylesheets/specifications.css
 
 markdown_extensions:
   - attr_list
@@ -117,6 +122,7 @@ nav:
     - Glossary: definitions.md
 
 not_in_nav: |
+  specifications/*
   admin_draft_review.md
   coalition.md
   cosignatories.md
