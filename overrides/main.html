@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{#- A page can opt out of search engine indexing with `robots: noindex` in its
+    front matter. The specification registry uses this while it is unlisted. -#}
+{% block extrahead %}
+  {{ super() }}
+  {%- if page and page.meta and page.meta.robots %}
+  <meta name="robots" content="{{ page.meta.robots }}">
+  {%- endif %}
+{% endblock %}

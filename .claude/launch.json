@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mkdocs-en",
+      "runtimeExecutable": "mkdocs",
+      "runtimeArgs": ["serve", "-f", "config/en/mkdocs.yml", "--dev-addr", "127.0.0.1:8000", "--watch", "overrides", "--watch", "hooks", "--watch", "data", "--watch", "scripts"],
+      "port": 8000
+    }
+  ]
+}

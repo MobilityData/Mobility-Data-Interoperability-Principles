@@ -1,0 +1,57 @@
+name: Specification registry change request
+description: Correct or add an entry in the MDIP specification registry (/specifications).
+title: "Change request: "
+labels: ["specification-registry"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Each specification and organization in the registry is one file in
+        [`data/`](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles/tree/main/data), described in
+        [`data/README.md`](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles/blob/main/data/README.md).
+        The quickest way to change an entry is "Suggest a change" on its page, which opens
+        its file for editing. Use this form to report a problem or ask a question instead.
+
+        Every change is discussed here in public before it is merged.
+  - type: input
+    id: spec_id
+    attributes:
+      label: Specification id
+      description: The file name in `data/specifications/`, without `.md`, for example `gtfs-schedule`. Leave empty to propose a new specification.
+    validations:
+      required: false
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: Type of change
+      options:
+        - Correct an existing entry
+        - Add a new specification
+        - Add or correct an organization
+        - Question about the methodology or scoring
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: What should change
+      description: Name the field (for example `principles.open_governance.verdict` or `homepage_url`) and give the value you propose.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Links that support the change, such as a licence file, governance charter, changelog or adopters list.
+    validations:
+      required: true
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: Your relationship to the specification
+      options:
+        - I am part of the maintaining organization
+        - I implement or use the specification
+        - Other
+    validations:
+      required: true

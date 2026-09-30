@@ -29,6 +29,39 @@ Over 60 public and private signatories have committed to implementing the Princi
 - [VIA Metropolitan Transit San Antonio](https://www.viainfo.net/)
 - [Washington State Department of Transportation (WSDOT) Public Transportation Division](https://wsdot.wa.gov/)
 
+## Specification registry (`/specifications`)
+
+The `/specifications` page, one page per specification under
+`/specifications/<id>/`, and a read-only JSON API under `/api/` are generated
+at build time from the files in [`data/`](data/README.md). GitHub is the
+source of truth and the place to contribute: each specification and each
+organization is one Markdown file with YAML front matter, and "Suggest a
+change" on a specification's page opens that file in GitHub's editor.
+
+The section is unlisted for now: it is not in the nav bar, the site search or
+the sitemap, and its pages carry `<meta name="robots" content="noindex">`.
+
+| Path | What it is |
+| --- | --- |
+| `data/specifications/<id>.md` | One specification: fields in front matter, then `# Description`. |
+| `data/organizations/<id>.md` | One organization, its role and a link to its logo. |
+| `data/principles.csv` | The criteria and what earns each verdict. |
+| `data/licences.csv` | The licence ids specifications may use. |
+| `data/README.md` | Every field and allowed value, the ranking, and the API. |
+| `scripts/spec_data.py` | Loads, validates and joins the files. |
+| `scripts/spec_api.py` | Builds the `/api/` files: catalogue, full records, export CSV, the OpenAPI description, and its Swagger UI page at `/api/docs/`. |
+| `scripts/check_specs.py` | `make specs-check`: validation, also run on every pull request. |
+| `hooks/specifications.py` | MkDocs hook that renders the pages and publishes the API. |
+
+```bash
+make specs-check    # validate the data; fails on any unknown value or key
+make specs-export   # write the API files to generated/api/
+make serve          # check the result
+```
+
+`make serve` caches the hook module, so restart the server after editing
+`hooks/` or `scripts/`: it rebuilds, but with the previous code.
+
 ## Building the site locally
 
 1. In Terminal, change the directory to one where you wish to build the site.

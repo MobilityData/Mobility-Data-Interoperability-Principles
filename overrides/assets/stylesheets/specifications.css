@@ -1,0 +1,1764 @@
+/* ==========================================================================
+   MDIP SPECIFICATION REGISTRY
+   /specifications and /specifications/<slug>
+
+   Scoped under .mdip-specs (listing) and .mdip-spec (detail) so nothing here
+   can leak into the rest of the documentation. Tokens are declared once on
+   those roots and re-declared for Material's slate scheme.
+   ========================================================================== */
+
+.mdip-specs,
+.mdip-spec {
+  --brand: #1b58a4;
+  --brand-600: #17497f;
+  --brand-300: #4892ec;
+
+  --bg: #ffffff;
+  --bg-sunk: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #f8fafd;
+  --line: #e3e8f2;
+  --line-strong: #cdd6e8;
+
+  --ink: #10192b;
+  --ink-2: #44506a;
+  --ink-3: #646e88;
+
+  --pass: #0f7b4f;
+  --pass-bg: #e6f5ee;
+  --warn: #a65c00;
+  --warn-bg: #fdf1e0;
+  --fail: #b3261e;
+  --fail-bg: #fcebe9;
+  --info: #1b58a4;
+  --info-bg: #e8f0fb;
+  --muted: #5d6880;
+  --muted-bg: #eef1f6;
+
+  --r-s: 8px;
+  --r-m: 14px;
+  --r-l: 20px;
+
+  --sh-1: 0 1px 2px rgba(16, 25, 43, .06), 0 1px 3px rgba(16, 25, 43, .04);
+  --sh-2: 0 4px 12px rgba(16, 25, 43, .07), 0 2px 4px rgba(16, 25, 43, .04);
+  --sh-3: 0 18px 40px -12px rgba(16, 25, 43, .22), 0 4px 12px rgba(16, 25, 43, .06);
+
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --panel-w: 16rem;
+
+  /* Material's .md-header is 2.4rem tall and sticks at top: 0. Anything else
+     that sticks has to start exactly there or the page shows through the gap
+     between the two bars. */
+  --hdr: 2.4rem;
+
+  color: var(--ink);
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: .78rem;
+  line-height: 1.55;
+}
+
+[data-md-color-scheme="slate"] .mdip-specs,
+[data-md-color-scheme="slate"] .mdip-spec {
+  --bg: #11131a;
+  --bg-sunk: #0c0e14;
+  --surface: #191c26;
+  --surface-2: #1f2330;
+  --line: #2b3040;
+  --line-strong: #3b4257;
+
+  --ink: #e9edf6;
+  --ink-2: #b3bcd0;
+  --ink-3: #8c96ad;
+
+  --pass: #5fd6a0;
+  --pass-bg: #113026;
+  --warn: #f0b258;
+  --warn-bg: #33250f;
+  --fail: #f4897f;
+  --fail-bg: #381a18;
+  --info: #7fb2f5;
+  --info-bg: #12233d;
+  --muted: #a3acc0;
+  --muted-bg: #232735;
+
+  --sh-1: 0 1px 2px rgba(0, 0, 0, .4);
+  --sh-2: 0 4px 14px rgba(0, 0, 0, .45);
+  --sh-3: 0 20px 44px -12px rgba(0, 0, 0, .6);
+}
+
+/* Let the two registry pages use the whole content column. `hide: navigation`
+   already removes the sidebar; this removes Material's article gutters too.
+   :has() covers the no-JS case,
+
+
+the body class covers browsers without it. */
+.md-content__inner:has(> .mdip-specs),
+.md-content__inner:has(> .mdip-spec),
+body.mdip-fullbleed .md-content__inner {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+.md-content__inner:has(> .mdip-specs)::before,
+.md-content__inner:has(> .mdip-spec)::before,
+body.mdip-fullbleed .md-content__inner::before {
+  display: none;
+}
+
+body.mdip-fullbleed .md-main__inner { margin-top: 0; }
+
+.mdip-specs *,
+.mdip-spec * { box-sizing: border-box; }
+
+:is(.mdip-specs, .mdip-spec) .u-sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+:is(.mdip-specs, .mdip-spec) .mdip-i {
+  width: 1.15em;
+  height: 1.15em;
+  fill: currentColor;
+  flex: none;
+  vertical-align: -.22em;
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .specs-hero,
+:is(.mdip-specs, .mdip-spec) .spec-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 1.9rem 1.1rem 1.5rem;
+  background: var(--bg-sunk);
+  border-bottom: 1px solid var(--line);
+  isolation: isolate;
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-hero__glow,
+:is(.mdip-specs, .mdip-spec) .spec-hero__glow {
+  position: absolute;
+  inset: -55% -10% auto -10%;
+  height: 150%;
+  z-index: -1;
+  background:
+    radial-gradient(42% 46% at 18% 32%, rgba(27, 88, 164, .22), transparent 70%),
+    radial-gradient(38% 42% at 78% 18%, rgba(72, 146, 236, .20), transparent 72%),
+    radial-gradient(30% 38% at 52% 78%, rgba(15, 123, 79, .12), transparent 70%);
+  filter: blur(12px);
+  animation: mdip-drift 26s var(--ease) infinite alternate;
+}
+
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .specs-hero__glow,
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .spec-hero__glow {
+  background:
+    radial-gradient(42% 46% at 18% 32%, rgba(72, 146, 236, .26), transparent 70%),
+    radial-gradient(38% 42% at 78% 18%, rgba(27, 88, 164, .30), transparent 72%),
+    radial-gradient(30% 38% at 52% 78%, rgba(95, 214, 160, .12), transparent 70%);
+}
+
+@keyframes mdip-drift {
+  from { transform: translate3d(-3%, -2%, 0) scale(1); }
+  to   { transform: translate3d(4%, 3%, 0) scale(1.12); }
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-hero__in,
+:is(.mdip-specs, .mdip-spec) .spec-hero__in {
+  max-width: 62rem;
+  margin: 0 auto;
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  margin: 0 0 .7rem;
+  padding: .28em .8em .28em .6em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--brand);
+  font-size: .62rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .specs-hero__eyebrow { color: var(--info); }
+
+.mdip-specs h1,
+.mdip-spec h1 {
+  margin: 0 0 .45rem;
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: clamp(1.9rem, 6vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-hero__lede,
+:is(.mdip-specs, .mdip-spec) .spec-hero__lede {
+  margin: 0;
+  max-width: 46rem;
+  color: var(--ink-2);
+  font-size: .78rem;
+  line-height: 1.55;
+}
+/* The lede is the entry's Markdown description, so it can hold several
+   paragraphs and lists. */
+:is(.mdip-specs, .mdip-spec) .spec-hero__lede > * { margin: 0; }
+:is(.mdip-specs, .mdip-spec) .spec-hero__lede > * + * { margin-top: .6em; }
+:is(.mdip-specs, .mdip-spec) .spec-hero__lede ul { padding-left: 1.2em; }
+:is(.mdip-specs, .mdip-spec) .spec-hero__lede ul li { list-style: disc; }
+
+:is(.mdip-specs, .mdip-spec) .specs-stats {
+  display: grid;
+  gap: .6rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 1.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+:is(.mdip-specs, .mdip-spec) .stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  padding: .8rem .85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--sh-1);
+}
+
+:is(.mdip-specs, .mdip-spec) .stat__ico { color: var(--brand); opacity: .85; }
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .stat__ico { color: var(--info); }
+
+:is(.mdip-specs, .mdip-spec) .stat__v {
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+}
+
+:is(.mdip-specs, .mdip-spec) .stat__l {
+  color: var(--ink-3);
+  font-size: .64rem;
+  line-height: 1.35;
+}
+
+@media (min-width: 55em) {
+  :is(.mdip-specs, .mdip-spec) .specs-hero,
+  :is(.mdip-specs, .mdip-spec) .spec-hero { padding: 3.4rem 2rem 2.6rem; }
+  :is(.mdip-specs, .mdip-spec) .specs-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
+  :is(.mdip-specs, .mdip-spec) .specs-hero__lede,
+  :is(.mdip-specs, .mdip-spec) .spec-hero__lede { font-size: .86rem; line-height: 1.62; }
+}
+
+/* --------------------------------------------------------------------------
+   Shared atoms: pills,
+
+
+tags,
+
+
+meters,
+
+
+logos,
+
+
+buttons
+   -------------------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .24em .7em .24em .5em;
+  border-radius: 999px;
+  font-size: .64rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+:is(.mdip-specs, .mdip-spec) .pill--pass { background: var(--pass-bg);  color: var(--pass); }
+:is(.mdip-specs, .mdip-spec) .pill--warn { background: var(--warn-bg);  color: var(--warn); }
+:is(.mdip-specs, .mdip-spec) .pill--fail { background: var(--fail-bg);  color: var(--fail); }
+:is(.mdip-specs, .mdip-spec) .pill--info { background: var(--info-bg);  color: var(--info); }
+:is(.mdip-specs, .mdip-spec) .pill--muted { background: var(--muted-bg); color: var(--muted); }
+
+:is(.mdip-specs, .mdip-spec) .tag {
+  display: inline-flex;
+  align-items: center;
+  padding: .18em .55em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-s);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: .62rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+:is(.mdip-specs, .mdip-spec) .tag--mode { border-color: color-mix(in srgb, var(--brand) 28%, var(--line)); color: var(--brand); }
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .tag--mode { color: var(--info); }
+
+:is(.mdip-specs, .mdip-spec) .tag--lic { font-variant-numeric: tabular-nums; }
+:is(.mdip-specs, .mdip-spec) .tag--lic-open { border-color: color-mix(in srgb, var(--pass) 34%, var(--line)); color: var(--pass); }
+:is(.mdip-specs, .mdip-spec) .tag--lic-restricted { border-color: color-mix(in srgb, var(--warn) 34%, var(--line)); color: var(--warn); }
+:is(.mdip-specs, .mdip-spec) .tag--lic-closed { border-color: color-mix(in srgb, var(--fail) 34%, var(--line)); color: var(--fail); }
+:is(.mdip-specs, .mdip-spec) .tag--lic-unknown { color: var(--ink-3); }
+:is(.mdip-specs, .mdip-spec) .tag--scope { background: var(--muted-bg); border-color: transparent; }
+
+:is(.mdip-specs, .mdip-spec) .meter { display: inline-flex; gap: 3px; align-items: center; }
+:is(.mdip-specs, .mdip-spec) .meter i {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  transition: transform .3s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .meter i.on { background: var(--brand); }
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .meter i.on { background: var(--info); }
+
+:is(.mdip-specs, .mdip-spec) .org-logo {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: none;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+:is(.mdip-specs, .mdip-spec) .org-logo--mono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: hsl(var(--org-hue, 215) 46% 92%);
+  color: hsl(var(--org-hue, 215) 52% 30%);
+  font-size: .5rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .org-logo--mono {
+  background: hsl(var(--org-hue, 215) 30% 26%);
+  color: hsl(var(--org-hue, 215) 60% 82%);
+}
+
+:is(.mdip-specs, .mdip-spec) .org-logo--stack { position: relative; display: inline-flex; }
+:is(.mdip-specs, .mdip-spec) .org-logo--stack > .org-logo--mono { width: 100%; height: 100%; }
+:is(.mdip-specs, .mdip-spec) .org-logo__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  background: var(--surface);
+}
+
+/* -- assessment rules (under the criteria on each specification page) ----- */
+
+:is(.mdip-specs, .mdip-spec) .method__body { padding: .7rem .8rem .8rem; }
+:is(.mdip-specs, .mdip-spec) .method__src { margin: .6rem 0 0; color: var(--ink-3); font-size: .62rem; }
+:is(.mdip-specs, .mdip-spec) .crits + .method { margin-top: .7rem; }
+:is(.mdip-specs, .mdip-spec) .method__scroll { overflow-x: auto; }
+.md-typeset :is(.mdip-specs, .mdip-spec) table.method__t {
+  display: table;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-collapse: collapse;
+  box-shadow: none;
+  font-size: .64rem;
+}
+.md-typeset :is(.mdip-specs, .mdip-spec) table.method__t { min-width: 40rem; }
+.md-typeset :is(.mdip-specs, .mdip-spec) .method__t :is(th, td) {
+  padding: .45rem .55rem;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: var(--ink-2);
+  line-height: 1.5;
+  text-align: left;
+  vertical-align: top;
+}
+.md-typeset :is(.mdip-specs, .mdip-spec) .method__t thead th {
+  border-top: 0;
+  color: var(--ink-3);
+  font-size: .58rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.md-typeset :is(.mdip-specs, .mdip-spec) .method__t tbody th { width: 22%; }
+:is(.mdip-specs, .mdip-spec) .method__name { display: block; color: var(--ink); font-weight: 700; }
+:is(.mdip-specs, .mdip-spec) .method__def { display: block; color: var(--ink-3); font-weight: 400; font-size: .6rem; }
+.md-typeset :is(.mdip-specs, .mdip-spec) .method__na { color: var(--ink-3); font-style: italic; }
+
+:is(.mdip-specs, .mdip-spec) .org-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  max-width: 100%;
+  color: var(--ink-2);
+  font-size: .66rem;
+  font-weight: 500;
+}
+:is(.mdip-specs, .mdip-spec) .org-chip > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:is(.mdip-specs, .mdip-spec) .org-chip--none { color: var(--ink-3); }
+
+:is(.mdip-specs, .mdip-spec) .org-chip--lg { font-size: .72rem; }
+:is(.mdip-specs, .mdip-spec) .org-chip--lg .org-logo { width: 1.5rem; height: 1.5rem; }
+:is(.mdip-specs, .mdip-spec) .org-chip--lg .org-logo--mono { font-size: .62rem; }
+
+:is(.mdip-specs, .mdip-spec) .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  padding: .5em .95em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: .7rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--sh-1);
+  transition: transform .18s var(--ease), box-shadow .18s var(--ease),
+              background-color .18s var(--ease), border-color .18s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .btn:hover { transform: translateY(-1px); box-shadow: var(--sh-2); border-color: var(--brand); }
+:is(.mdip-specs, .mdip-spec) .btn--primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+:is(.mdip-specs, .mdip-spec) .btn--primary:hover { background: var(--brand-600); border-color: var(--brand-600); }
+.mdip-spec .btn,
+.mdip-specs .btn { font-weight: 600; }
+
+:is(.mdip-specs, .mdip-spec) .ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: .3em;
+  padding: .25em .55em;
+  border: 0;
+  border-radius: var(--r-s);
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  font-size: .64rem;
+  cursor: pointer;
+  transition: background-color .15s var(--ease), color .15s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .ghost:hover { background: var(--muted-bg); color: var(--ink); }
+
+:is(.mdip-specs, .mdip-spec) .srclink {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .3em .7em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--brand);
+  font-size: .64rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color .16s var(--ease), background-color .16s var(--ease),
+              transform .16s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .srclink:hover { border-color: var(--brand); background: var(--info-bg); transform: translateY(-1px); }
+:is(.mdip-specs, .mdip-spec) .srclink .mdip-i:last-child { width: .85em; height: .85em; opacity: .6; }
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .srclink { color: var(--info); }
+
+.mdip-specs a,
+.mdip-spec a { color: var(--brand); }
+[data-md-color-scheme="slate"] .mdip-specs a,
+[data-md-color-scheme="slate"] .mdip-spec a { color: var(--info); }
+
+.mdip-specs :focus-visible,
+.mdip-spec :focus-visible {
+  outline: 2px solid var(--brand-300);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Listing layout
+   -------------------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .specs-layout {
+  display: block;
+  max-width: 96rem;
+  margin: 0 auto;
+  padding: 1.1rem;
+}
+
+@media (min-width: 60em) {
+  :is(.mdip-specs, .mdip-spec) .specs-layout {
+    display: grid;
+    grid-template-columns: var(--panel-w) minmax(0, 1fr);
+    gap: 1.2rem;
+    padding: 1.2rem 2rem 3rem;
+    align-items: start;
+  }
+}
+
+/* -- filter panel ---------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .specs-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+@media (min-width: 60em) {
+  :is(.mdip-specs, .mdip-spec) .specs-panel {
+    position: sticky;
+    top: calc(var(--hdr) + .8rem);
+    max-height: calc(100vh - var(--hdr) - 1.6rem);
+    padding: .55rem .6rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-m);
+    background: var(--surface);
+    box-shadow: var(--sh-1);
+  }
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-panel__head {
+  margin-bottom: .1rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .1rem .2rem .7rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-panel__head h2 {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  margin: 0;
+  flex: 1;
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-panel__close {
+  display: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  padding: .25rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-find,
+:is(.mdip-specs, .mdip-spec) .facet__find {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  padding: .45em .7em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-3);
+  transition: border-color .16s var(--ease), box-shadow .16s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .specs-find:focus-within,
+:is(.mdip-specs, .mdip-spec) .facet__find:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 15%, transparent);
+}
+:is(.mdip-specs, .mdip-spec) .specs-find input,
+:is(.mdip-specs, .mdip-spec) .facet__find input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: .7rem;
+  outline: none;
+}
+:is(.mdip-specs, .mdip-spec) .facet__find { margin: 0 0 .5rem; padding: .32em .6em; border-radius: var(--r-s); }
+:is(.mdip-specs, .mdip-spec) .facet__find input { font-size: .66rem; }
+
+:is(.mdip-specs, .mdip-spec) .specs-panel__scroll {
+  margin-top: .7rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+@media (min-width: 60em) {
+  :is(.mdip-specs, .mdip-spec) .specs-panel__scroll { padding-right: .25rem; }
+}
+
+/* -- one facet ------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .facet {
+  border-bottom: 1px solid var(--line);
+}
+:is(.mdip-specs, .mdip-spec) .facet:last-child { border-bottom: 0; }
+
+:is(.mdip-specs, .mdip-spec) .facet__head {
+  padding-block: .38em;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: .45em;
+  padding: .62rem .2rem;
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+  font-size: .7rem;
+  font-weight: 600;
+  user-select: none;
+  transition: color .15s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .facet__head::-webkit-details-marker { display: none; }
+:is(.mdip-specs, .mdip-spec) .facet__head:hover { color: var(--brand); }
+:is(.mdip-specs, .mdip-spec) .facet__icon { color: var(--ink-3); }
+:is(.mdip-specs, .mdip-spec) .facet__label {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__badge {
+  min-width: 1.15rem;
+  padding: 0 .35em;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: .58rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.15rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__chev {
+  color: var(--ink-3);
+  transition: transform .25s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .facet[open] > .facet__head .facet__chev { transform: rotate(180deg); }
+
+:is(.mdip-specs, .mdip-spec) .facet__body { padding: 0 .2rem .45rem; animation: mdip-reveal .28s var(--ease); }
+
+@keyframes mdip-reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+
+:is(.mdip-specs, .mdip-spec) .facet__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 15rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__item input {
+  position: absolute;
+  opacity: 0;
+  width: 1px; height: 1px;
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__item label {
+  padding-block: .22em;
+  display: flex;
+  align-items: center;
+  gap: .45em;
+  padding: .3em .45em;
+  border-radius: var(--r-s);
+  color: var(--ink-2);
+  font-size: .68rem;
+  cursor: pointer;
+  transition: background-color .14s var(--ease), color .14s var(--ease);
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__item label::before {
+  content: "";
+  flex: none;
+  width: .82rem;
+  height: .82rem;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  transition: background-color .16s var(--ease), border-color .16s var(--ease);
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__item label:hover { background: var(--muted-bg); color: var(--ink); }
+
+:is(.mdip-specs, .mdip-spec) .facet__item input:checked + label { color: var(--ink); font-weight: 600; }
+:is(.mdip-specs, .mdip-spec) .facet__item input:checked + label::before {
+  border-color: var(--brand);
+  background: var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M9 20.42 2.79 14.21l2.83-2.83L9 14.77l9.88-9.89 2.83 2.83z'/%3E%3C/svg%3E") center/.6rem no-repeat;
+}
+:is(.mdip-specs, .mdip-spec) .facet__item input:focus-visible + label::before {
+  outline: 2px solid var(--brand-300);
+  outline-offset: 2px;
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+:is(.mdip-specs, .mdip-spec) .facet__n {
+  color: var(--ink-3);
+  font-size: .6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(.mdip-specs, .mdip-spec) .facet__none { margin: .3rem .45em; color: var(--ink-3); font-size: .62rem; }
+
+:is(.mdip-specs, .mdip-spec) .facet-group {
+  margin-top: .5rem;
+  padding: .6rem .5rem .2rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-m);
+  background: var(--surface-2);
+}
+:is(.mdip-specs, .mdip-spec) .facet-group__title {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  margin: 0 0 .2rem;
+  color: var(--ink-3);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+:is(.mdip-specs, .mdip-spec) .facet-group .facet:last-child { border-bottom: 0; }
+
+/* -- mobile drawer --------------------------------------------------------- */
+
+/* On small screens this is a floating action button: pinned to the thumb, and
+   out of the flow so it can never sit on top of the result count. */
+:is(.mdip-specs, .mdip-spec) .specs-drawer-btn {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  padding: .7em 1.15em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--ink);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--sh-3);
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-drawer-btn__n {
+  min-width: 1.15rem;
+  padding: 0 .3em;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: .58rem;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+@media (min-width: 60em) {
+  :is(.mdip-specs, .mdip-spec) .specs-drawer-btn { display: none; }
+}
+
+/* room for the floating button under the last card */
+@media (max-width: 59.99em) {
+  :is(.mdip-specs, .mdip-spec) .specs-results { padding-bottom: 4rem; }
+}
+
+@media (max-width: 59.99em) {
+  :is(.mdip-specs, .mdip-spec) .specs-panel {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 10;
+    width: min(21rem, 92vw);
+    padding: .9rem .8rem 1.4rem;
+    background: var(--surface);
+    box-shadow: var(--sh-3);
+    transform: translateX(101%);
+    visibility: hidden;
+    transition: transform .34s var(--ease), visibility .34s;
+  }
+  :is(.mdip-specs, .mdip-spec) .specs-panel[data-open] { transform: none; visibility: visible; }
+  :is(.mdip-specs, .mdip-spec) .specs-panel__close { display: block; }
+  :is(.mdip-specs, .mdip-spec) .specs-panel__scroll { flex: 1; }
+
+  body.mdip-drawer-open { overflow: hidden; }
+  body.mdip-drawer-open::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+    background: rgba(10, 16, 28, .45);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: mdip-fade .3s var(--ease);
+  }
+}
+
+@keyframes mdip-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* -- results --------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .specs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  flex-wrap: wrap;
+  margin-bottom: .55rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-count {
+  flex: 1;
+  display: inline-flex;
+  align-items: baseline;
+  gap: .3em;
+  margin: 0;
+  color: var(--ink-3);
+  font-size: .66rem;
+}
+:is(.mdip-specs, .mdip-spec) .specs-count strong {
+  color: var(--ink);
+  font-size: .82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .3em .5em .3em .7em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: .68rem;
+}
+:is(.mdip-specs, .mdip-spec) .specs-sort select {
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+:is(.mdip-specs, .mdip-spec) .specs-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-bottom: .9rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3em;
+  padding: .22em .3em .22em .65em;
+  border: 1px solid color-mix(in srgb, var(--brand) 32%, var(--line));
+  border-radius: 999px;
+  background: var(--info-bg);
+  color: var(--brand);
+  font-size: .62rem;
+  font-weight: 600;
+  animation: mdip-pop .22s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .chip { color: var(--info); }
+:is(.mdip-specs, .mdip-spec) .chip button {
+  display: inline-flex;
+  padding: .1em;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: .65;
+}
+:is(.mdip-specs, .mdip-spec) .chip button:hover { opacity: 1; background: color-mix(in srgb, var(--brand) 16%, transparent); }
+:is(.mdip-specs, .mdip-spec) .chip .mdip-i { width: .85em; height: .85em; }
+
+@keyframes mdip-pop {
+  from { opacity: 0; transform: scale(.9); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* The registry is a list, not a gallery: one column at every width, rows
+   divided by hairlines inside a single bordered container. Scanning 55 rows
+   for a status works when the status sits in the same place on every line,
+   which a reflowing card grid cannot promise. */
+:is(.mdip-specs, .mdip-spec) .specs-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-row + .spec-row { border-top: 1px solid var(--line); }
+:is(.mdip-specs, .mdip-spec) .spec-row[hidden] { display: none; }
+
+:is(.mdip-specs, .mdip-spec) .spec-row__link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "main go" "side go";
+  align-items: start;
+  gap: .3rem .7rem;
+  padding: .7rem .8rem;
+  /* additional.css bolds every <a>; a row wrapping a block of body copy opts
+     back out. */
+  font-weight: 400;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color .16s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .spec-row__link:hover { background: var(--surface-2); }
+:is(.mdip-specs, .mdip-spec) .spec-row__link:hover .spec-row__go { opacity: 1; transform: none; }
+
+@media (min-width: 52em) {
+  :is(.mdip-specs, .mdip-spec) .spec-row__link {
+    grid-template-columns: minmax(0, 1fr) 11.5rem auto;
+    grid-template-areas: "main side go";
+    align-items: center;
+    gap: .9rem;
+    padding: .7rem 1rem;
+  }
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-row__main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  gap: .18rem;
+  min-width: 0;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .1rem .5rem;
+}
+:is(.mdip-specs, .mdip-spec) .spec-row__name {
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: .92rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+:is(.mdip-specs, .mdip-spec) .spec-row__full { color: var(--ink-3); font-size: .64rem; line-height: 1.4; }
+
+:is(.mdip-specs, .mdip-spec) .spec-row__fn {
+  color: var(--ink-2);
+  font-size: .68rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .25rem .55rem;
+  margin-top: .12rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-row__side {
+  grid-area: side;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .3rem .5rem;
+}
+@media (min-width: 52em) {
+  :is(.mdip-specs, .mdip-spec) .spec-row__side {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .22rem;
+    text-align: right;
+  }
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-row__facts { color: var(--ink-3); font-size: .6rem; line-height: 1.4; }
+
+:is(.mdip-specs, .mdip-spec) .spec-row__go {
+  grid-area: go;
+  align-self: center;
+  color: var(--brand);
+  opacity: .3;
+  transform: translateX(-2px);
+  transition: opacity .16s var(--ease), transform .16s var(--ease);
+}
+[data-md-color-scheme="slate"] :is(.mdip-specs, .mdip-spec) .spec-row__go { color: var(--info); }
+
+/* Stacked, the row is tall and the chevron ends up marooned beside its
+   middle. The whole row is the link; drop the hint. */
+@media (max-width: 51.99em) {
+  :is(.mdip-specs, .mdip-spec) .spec-row__go { display: none; }
+  :is(.mdip-specs, .mdip-spec) .spec-row__link {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "main" "side";
+  }
+}
+
+/* -- specifications with no published finding ------------------------------ */
+
+:is(.mdip-specs, .mdip-spec) .specs-defer { margin-top: .9rem; }
+:is(.mdip-specs, .mdip-spec) .specs-defer[hidden] { display: none; }
+
+:is(.mdip-specs, .mdip-spec) .specs-defer__head {
+  display: flex;
+  align-items: center;
+  gap: .45em;
+  padding: .5em .7em;
+  border-radius: var(--r-s);
+  color: var(--ink-3);
+  font-size: .68rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+:is(.mdip-specs, .mdip-spec) .specs-defer__head::-webkit-details-marker { display: none; }
+:is(.mdip-specs, .mdip-spec) .specs-defer__head:hover { background: var(--muted-bg); color: var(--ink-2); }
+:is(.mdip-specs, .mdip-spec) .specs-defer__t { flex: 1; }
+:is(.mdip-specs, .mdip-spec) .specs-defer__n {
+  min-width: 1.25rem;
+  padding: 0 .35em;
+  border-radius: 999px;
+  background: var(--muted-bg);
+  color: var(--ink-3);
+  font-size: .58rem;
+  line-height: 1.25rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+:is(.mdip-specs, .mdip-spec) .specs-defer__head .mdip-i:last-child { transition: transform .2s var(--ease); }
+:is(.mdip-specs, .mdip-spec) .specs-defer[open] > .specs-defer__head .mdip-i:last-child { transform: rotate(180deg); }
+:is(.mdip-specs, .mdip-spec) .specs-defer__note {
+  margin: 0 .7em .55rem;
+  color: var(--ink-3);
+  font-size: .64rem;
+  line-height: 1.5;
+  max-width: 46rem;
+}
+:is(.mdip-specs, .mdip-spec) .specs-list--defer { background: var(--surface-2); box-shadow: none; }
+
+/* -- change requests ------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .specs-foot {
+  display: flex;
+  align-items: flex-start;
+  gap: .45em;
+  margin: 1.1rem 0 0;
+  color: var(--ink-3);
+  font-size: .66rem;
+  line-height: 1.55;
+}
+:is(.mdip-specs, .mdip-spec) .specs-foot .mdip-i { flex: none; margin-top: .18em; }
+
+:is(.mdip-specs, .mdip-spec) .contribute {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .7rem 1rem;
+  margin: 2.2rem 0 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface-2);
+}
+:is(.mdip-specs, .mdip-spec) .contribute__ico { flex: none; width: 1.5rem; height: 1.5rem; color: var(--ink-3); }
+:is(.mdip-specs, .mdip-spec) .contribute__t { flex: 1 1 16rem; min-width: 0; }
+:is(.mdip-specs, .mdip-spec) .contribute__t h2 {
+  margin: 0;
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+:is(.mdip-specs, .mdip-spec) .contribute__a { display: flex; flex-wrap: wrap; gap: .5rem; }
+:is(.mdip-specs, .mdip-spec) .contribute__t p { margin: .2rem 0 0; color: var(--ink-2); font-size: .68rem; line-height: 1.55; }
+
+:is(.mdip-specs, .mdip-spec) .specs-empty {
+  padding: 3rem 1rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-l);
+  background: var(--surface-2);
+  text-align: center;
+  color: var(--ink-3);
+}
+:is(.mdip-specs, .mdip-spec) .specs-empty .mdip-i { width: 2.2rem; height: 2.2rem; opacity: .4; }
+:is(.mdip-specs, .mdip-spec) .specs-empty h2 {
+  margin: .6rem 0 .3rem;
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: 1rem;
+  color: var(--ink);
+}
+:is(.mdip-specs, .mdip-spec) .specs-empty p { margin: 0 0 1rem; font-size: .72rem; }
+
+/* --------------------------------------------------------------------------
+   Detail page
+   -------------------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .spec-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  margin: 1rem 1.1rem .2rem;
+  padding: .3em .8em .3em .55em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-2) !important;
+  font-size: .66rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .18s var(--ease), border-color .18s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .spec-back:hover { transform: translateX(-2px); border-color: var(--brand); }
+
+@media (min-width: 55em) { :is(.mdip-specs, .mdip-spec) .spec-back { margin: 1.3rem 2rem .2rem; } }
+
+:is(.mdip-specs, .mdip-spec) .spec-hero { border-radius: 0; margin-top: .6rem; border-top: 1px solid var(--line); }
+
+:is(.mdip-specs, .mdip-spec) .spec-hero__top {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  flex-wrap: wrap;
+  margin-bottom: .8rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-hero__full {
+  margin: 0 0 .7rem;
+  color: var(--ink-2);
+  font-size: .88rem;
+  font-weight: 500;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: 1.2rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-hero__orgs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem 1.1rem;
+  margin-top: 1.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+:is(.mdip-specs, .mdip-spec) .spec-hero__orgs-l {
+  color: var(--ink-3);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-nav {
+  position: sticky;
+  top: var(--hdr);
+  z-index: 4;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+}
+:is(.mdip-specs, .mdip-spec) .spec-nav ul {
+  display: flex;
+  gap: .2rem;
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: .3rem 1.1rem;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+:is(.mdip-specs, .mdip-spec) .spec-nav ul::-webkit-scrollbar { display: none; }
+:is(.mdip-specs, .mdip-spec) .spec-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .45em .7em;
+  border-radius: var(--r-s);
+  color: var(--ink-2) !important;
+  font-size: .66rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color .16s var(--ease), color .16s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .spec-nav a:hover,
+:is(.mdip-specs, .mdip-spec) .spec-nav a.is-active { background: var(--info-bg); color: var(--brand) !important; }
+@media (min-width: 55em) { :is(.mdip-specs, .mdip-spec) .spec-nav ul { padding: .3rem 2rem; } }
+
+:is(.mdip-specs, .mdip-spec) .spec-body {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.6rem 1.1rem 2rem;
+}
+@media (min-width: 55em) { :is(.mdip-specs, .mdip-spec) .spec-body { padding: 2.2rem 2rem 3rem; } }
+
+:is(.mdip-specs, .mdip-spec) .spec-section {
+  /* header + the sticky in-page nav, so an anchor lands under both. */
+  scroll-margin-top: calc(var(--hdr) + 3.2rem);
+  margin-bottom: 2.2rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .spec-h2 {
+  display: flex;
+  align-items: center;
+  gap: .45em;
+  margin: 0 0 .8rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--line);
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+:is(.mdip-specs, .mdip-spec) .spec-h2 .mdip-i { color: var(--brand); opacity: .8; }
+:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .spec-h2 .mdip-i { color: var(--info); }
+
+
+/* -- at a glance ----------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .glance {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--line);
+  overflow: hidden;
+}
+
+:is(.mdip-specs, .mdip-spec) .glance__row {
+  display: grid;
+  gap: .2rem .9rem;
+  padding: .7rem .9rem;
+  background: var(--surface);
+}
+
+@media (min-width: 42em) {
+  :is(.mdip-specs, .mdip-spec) .glance__row { grid-template-columns: 15rem minmax(0, 1fr); align-items: baseline; }
+}
+
+:is(.mdip-specs, .mdip-spec) .glance dt {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  color: var(--ink-3);
+  font-size: .66rem;
+  font-weight: 600;
+}
+:is(.mdip-specs, .mdip-spec) .glance dt .mdip-i { opacity: .7; }
+
+:is(.mdip-specs, .mdip-spec) .glance dd {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35rem .5rem;
+  margin: 0;
+  color: var(--ink);
+  font-size: .72rem;
+  overflow-wrap: anywhere;
+}
+:is(.mdip-specs, .mdip-spec) .glance dd code {
+  padding: .1em .4em;
+  border-radius: 4px;
+  background: var(--muted-bg);
+  font-size: .68rem;
+}
+:is(.mdip-specs, .mdip-spec) .glance__note { color: var(--ink-3); font-size: .64rem; }
+
+/* -- criteria -------------------------------------------------------------- */
+
+/* Five criteria, five rows. The verdict answers the question; the reasoning
+   folds away behind the row so the section stays a summary rather than a wall
+   of five rationales. Tone lives in the icon and the pill only. */
+:is(.mdip-specs, .mdip-spec) .crits {
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+
+:is(.mdip-specs, .mdip-spec) .crit { border: 0; border-radius: 0; background: none; box-shadow: none; }
+:is(.mdip-specs, .mdip-spec) .crit + .crit { border-top: 1px solid var(--line); }
+
+:is(.mdip-specs, .mdip-spec) .crit__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "ico title chev" ". pill chev";
+  align-items: start;
+  gap: .25rem .55rem;
+  padding: .55rem .75rem;
+  list-style: none;
+}
+:is(.mdip-specs, .mdip-spec) .crit__head::-webkit-details-marker { display: none; }
+:is(.mdip-specs, .mdip-spec) details.crit > .crit__head { cursor: pointer; }
+:is(.mdip-specs, .mdip-spec) details.crit > .crit__head:hover { background: var(--surface-2); }
+
+@media (min-width: 42em) {
+  :is(.mdip-specs, .mdip-spec) .crit__head {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "ico title pill chev";
+    align-items: center;
+    gap: .7rem;
+  }
+}
+
+:is(.mdip-specs, .mdip-spec) .crit__icon { grid-area: ico; display: inline-flex; padding-top: .1rem; }
+:is(.mdip-specs, .mdip-spec) .crit__icon .mdip-i { width: 1.05rem; height: 1.05rem; }
+:is(.mdip-specs, .mdip-spec) .crit--pass  .crit__icon { color: var(--pass); }
+:is(.mdip-specs, .mdip-spec) .crit--warn  .crit__icon { color: var(--warn); }
+:is(.mdip-specs, .mdip-spec) .crit--fail  .crit__icon { color: var(--fail); }
+:is(.mdip-specs, .mdip-spec) .crit--muted .crit__icon { color: var(--muted); }
+@media (min-width: 42em) { :is(.mdip-specs, .mdip-spec) .crit__icon { padding-top: 0; } }
+
+:is(.mdip-specs, .mdip-spec) .crit__title {
+  grid-area: title;
+  display: flex;
+  flex-direction: column;
+  gap: .05rem;
+  min-width: 0;
+}
+:is(.mdip-specs, .mdip-spec) .crit__label {
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+:is(.mdip-specs, .mdip-spec) .crit__blurb { color: var(--ink-3); font-size: .62rem; line-height: 1.45; }
+
+:is(.mdip-specs, .mdip-spec) .crit__verdict { grid-area: pill; justify-self: start; display: inline-flex; align-items: center; gap: .4rem; }
+@media (min-width: 42em) { :is(.mdip-specs, .mdip-spec) .crit__verdict { justify-self: end; } }
+
+:is(.mdip-specs, .mdip-spec) .crit__src {
+  grid-area: chev;
+  align-self: center;
+  justify-self: start;
+}
+@media (min-width: 42em) { :is(.mdip-specs, .mdip-spec) .crit__src { justify-self: end; } }
+:is(.mdip-specs, .mdip-spec) .crit__src .srclink {
+  padding: .22em .5em;
+  font-size: .6rem;
+}
+
+:is(.mdip-specs, .mdip-spec) .crit__chev {
+  grid-area: chev;
+  align-self: center;
+  color: var(--ink-3);
+  opacity: .55;
+  transition: transform .2s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .crit__chev .mdip-i { width: .95rem; height: .95rem; }
+:is(.mdip-specs, .mdip-spec) details.crit[open] > .crit__head .crit__chev { transform: rotate(180deg); }
+
+:is(.mdip-specs, .mdip-spec) .crit__body {
+  padding: .6rem .8rem .7rem 2.35rem;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+  animation: mdip-reveal .24s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .crit__rationale {
+  margin: 0 0 .5rem;
+  color: var(--ink-2);
+  font-size: .68rem;
+  line-height: 1.6;
+}
+:is(.mdip-specs, .mdip-spec) .crit__rationale:last-child { margin-bottom: 0; }
+
+:is(.mdip-specs, .mdip-spec) .spec-h2__n {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: .66rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* -- licensing ------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .lics { display: grid; gap: .6rem; }
+@media (min-width: 48em) { :is(.mdip-specs, .mdip-spec) .lics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+:is(.mdip-specs, .mdip-spec) .lic {
+  padding: .8rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+
+:is(.mdip-specs, .mdip-spec) .lic__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem .6rem; }
+:is(.mdip-specs, .mdip-spec) .lic__head h3 {
+  margin: 0;
+  flex: 1;
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+:is(.mdip-specs, .mdip-spec) .lic__head h3 a { color: inherit !important; text-decoration: none; }
+:is(.mdip-specs, .mdip-spec) .lic__head h3 a:hover { color: var(--brand) !important; }
+:is(.mdip-specs, .mdip-spec) .lic__head h3 a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .3em;
+}
+:is(.mdip-specs, .mdip-spec) .lic__head h3 .mdip-i { width: .8em; height: .8em; opacity: .45; }
+
+:is(.mdip-specs, .mdip-spec) .lic__name {
+  margin: .15rem 0 0;
+  color: var(--ink-3);
+  font-size: .66rem;
+  line-height: 1.4;
+}
+:is(.mdip-specs, .mdip-spec) .lic__scopes { display: flex; gap: .25rem; flex-wrap: wrap; }
+
+:is(.mdip-specs, .mdip-spec) .lic__note {
+  display: flex;
+  gap: .4em;
+  margin: .5rem 0 0;
+  color: var(--ink-3);
+  font-size: .64rem;
+  line-height: 1.5;
+}
+:is(.mdip-specs, .mdip-spec) .lic__evidence { margin: .7rem 0 0; }
+
+:is(.mdip-specs, .mdip-spec) .disclosure {
+  margin-top: .9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface-2);
+}
+:is(.mdip-specs, .mdip-spec) .disclosure summary {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  padding: .55rem .8rem;
+  color: var(--ink-3);
+  font-size: .64rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+:is(.mdip-specs, .mdip-spec) .disclosure summary::-webkit-details-marker { display: none; }
+:is(.mdip-specs, .mdip-spec) .disclosure summary:hover { color: var(--ink); }
+:is(.mdip-specs, .mdip-spec) .disclosure[open] summary { border-bottom: 1px solid var(--line); }
+:is(.mdip-specs, .mdip-spec) .disclosure__t {
+  margin: 0;
+  padding: .7rem .8rem;
+  color: var(--ink-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .64rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+:is(.mdip-specs, .mdip-spec) .disclosure__t + .disclosure__t { padding-top: 0; }
+
+/* -- maintainers ----------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) .orgs { display: grid; gap: .6rem; }
+@media (min-width: 48em) { :is(.mdip-specs, .mdip-spec) .orgs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+:is(.mdip-specs, .mdip-spec) .orgcard {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .8rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .orgcard:hover { border-color: color-mix(in srgb, var(--brand) 34%, var(--line)); box-shadow: var(--sh-2); }
+:is(.mdip-specs, .mdip-spec) .orgcard .org-logo { width: 2.4rem; height: 2.4rem; }
+:is(.mdip-specs, .mdip-spec) .orgcard .org-logo--mono { font-size: .9rem; border-radius: 8px; }
+:is(.mdip-specs, .mdip-spec) .orgcard__t { min-width: 0; }
+:is(.mdip-specs, .mdip-spec) .orgcard__t h3 {
+  margin: 0;
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+:is(.mdip-specs, .mdip-spec) .orgcard__t p { margin: 0; color: var(--ink-3); font-size: .62rem; }
+:is(.mdip-specs, .mdip-spec) .orgcard__t a {
+  display: inline-flex;
+  align-items: center;
+  gap: .25em;
+  margin-top: .15rem;
+  font-size: .64rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+:is(.mdip-specs, .mdip-spec) .orgcard__t a .mdip-i { width: .8em; height: .8em; opacity: .55; }
+
+:is(.mdip-specs, .mdip-spec) .related { margin-top: 1.1rem; }
+:is(.mdip-specs, .mdip-spec) .related h3 {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  margin: 0 0 .5rem;
+  color: var(--ink-3);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+:is(.mdip-specs, .mdip-spec) .related ul { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+:is(.mdip-specs, .mdip-spec) .related a {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .3em .75em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink) !important;
+  font-size: .66rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .18s var(--ease), border-color .18s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .related a:hover { transform: translateY(-1px); border-color: var(--brand); }
+:is(.mdip-specs, .mdip-spec) .related__i--pass { color: var(--pass); }
+:is(.mdip-specs, .mdip-spec) .related__i--warn { color: var(--warn); }
+:is(.mdip-specs, .mdip-spec) .related__i--fail { color: var(--fail); }
+:is(.mdip-specs, .mdip-spec) .related__i--info { color: var(--info); }
+:is(.mdip-specs, .mdip-spec) .related__i--muted { color: var(--muted); }
+
+:is(.mdip-specs, .mdip-spec) .spec-foot {
+  display: flex;
+  gap: .5em;
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.2rem 1.1rem 2.4rem;
+  color: var(--ink-3);
+  font-size: .64rem;
+  line-height: 1.55;
+}
+:is(.mdip-specs, .mdip-spec) .spec-foot p { margin: 0; }
+@media (min-width: 55em) { :is(.mdip-specs, .mdip-spec) .spec-foot { padding: 1.2rem 2rem 3rem; } }
+
+/* --------------------------------------------------------------------------
+   Material list overrides
+
+   Material styles every list inside .md-typeset with
+   `.md-typeset ul:not([hidden]) { display: flow-root }` and sets the marker on
+   `.md-typeset ul li`. Both outrank a plain class selector, so the few lists
+   that carry layout restate it here using the same :not([hidden]) idiom.
+   -------------------------------------------------------------------------- */
+
+/* Material also indents every list: `[dir=ltr] .md-typeset ul { margin-left:
+   .625em }` plus padding, which pushes the filter options out of alignment
+   with their headings. Reset the gutters first, then restate the few lists
+   that carry layout or a margin of their own. */
+:is(.mdip-specs, .mdip-spec) ul:not([hidden]),
+:is(.mdip-specs, .mdip-spec) ol:not([hidden]) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:is(.mdip-specs, .mdip-spec) ul.specs-stats:not([hidden]) {
+  display: grid;
+  margin: 1.2rem 0 0;
+}
+@media (min-width: 55em) {
+  :is(.mdip-specs, .mdip-spec) ul.specs-stats:not([hidden]) { margin: 1.6rem 0 0; }
+}
+:is(.mdip-specs, .mdip-spec) ol.specs-list:not([hidden]) { display: block; }
+:is(.mdip-specs, .mdip-spec) ul.facet__list:not([hidden]) { display: block; }
+:is(.mdip-specs, .mdip-spec) .related ul:not([hidden]) { display: flex; }
+:is(.mdip-specs, .mdip-spec) .spec-nav ul:not([hidden]) {
+  display: flex;
+  margin: 0 auto;
+  padding: .3rem 1.1rem;
+}
+@media (min-width: 55em) {
+  :is(.mdip-specs, .mdip-spec) .spec-nav ul:not([hidden]) { padding: .3rem 2rem; }
+}
+
+/* Several controls set `display` explicitly, which beats the UA's [hidden]
+   rule; the script toggles `hidden`, so it has to win. */
+:is(.mdip-specs, .mdip-spec) [hidden] { display: none !important; }
+
+:is(.mdip-specs, .mdip-spec) ul li,
+:is(.mdip-specs, .mdip-spec) ol li {
+  margin: 0;
+  list-style: none;
+}
+
+:is(.mdip-specs, .mdip-spec) ul li::marker,
+:is(.mdip-specs, .mdip-spec) ol li::marker { content: ""; }
+
+:is(.mdip-specs, .mdip-spec) li.spec-row { display: block; }
+:is(.mdip-specs, .mdip-spec) li.spec-row[hidden] { display: none; }
+
+/* --------------------------------------------------------------------------
+   Material <details> overrides
+
+   pymdownx.details makes every <details> in .md-typeset look like a collapsible
+   admonition: tinted box, left border, and an icon plus chevron drawn as
+   summary::before / ::after. `[dir=ltr] .md-typeset summary` is 0-2-1, so the
+   filter disclosures restate their own look here at 0-3-1 and strip the two
+   pseudo-elements.
+   -------------------------------------------------------------------------- */
+
+:is(.mdip-specs, .mdip-spec) details.facet,
+:is(.mdip-specs, .mdip-spec) details.disclosure,
+:is(.mdip-specs, .mdip-spec) details.crit,
+:is(.mdip-specs, .mdip-spec) details.specs-defer {
+  display: block;
+  overflow: visible;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: inherit;
+}
+
+:is(.mdip-specs, .mdip-spec) details.crit { border: 0; }
+:is(.mdip-specs, .mdip-spec) details.crit + .crit { border-top: 1px solid var(--line); }
+:is(.mdip-specs, .mdip-spec) details.specs-defer { border: 0; margin-top: .9rem; }
+
+:is(.mdip-specs, .mdip-spec) details.facet {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+}
+:is(.mdip-specs, .mdip-spec) details.facet:last-child { border-bottom: 0; }
+
+:is(.mdip-specs, .mdip-spec) details.disclosure {
+  margin-top: .9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface-2);
+}
+
+:is(.mdip-specs, .mdip-spec) details.facet > summary,
+:is(.mdip-specs, .mdip-spec) details.disclosure > summary,
+:is(.mdip-specs, .mdip-spec) details.crit > summary,
+:is(.mdip-specs, .mdip-spec) details.specs-defer > summary {
+  display: flex;
+  align-items: center;
+  /* Material bleeds the admonition title past its box with `margin: 0 -.6rem`,
+     which pushed the chevron outside the filter panel. */
+  margin: 0;
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-weight: 600;
+  list-style: none;
+}
+
+:is(.mdip-specs, .mdip-spec) details.facet > summary {
+  gap: .45em;
+  padding: .42rem .2rem;
+  color: var(--ink);
+  font-size: .68rem;
+}
+:is(.mdip-specs, .mdip-spec) details.disclosure > summary {
+  gap: .4em;
+  padding: .55rem .8rem;
+  color: var(--ink-3);
+  font-size: .64rem;
+}
+:is(.mdip-specs, .mdip-spec) details.disclosure[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+:is(.mdip-specs, .mdip-spec) details.facet > summary::before,
+:is(.mdip-specs, .mdip-spec) details.facet > summary::after,
+:is(.mdip-specs, .mdip-spec) details.disclosure > summary::before,
+:is(.mdip-specs, .mdip-spec) details.disclosure > summary::after,
+:is(.mdip-specs, .mdip-spec) details.crit > summary::before,
+:is(.mdip-specs, .mdip-spec) details.crit > summary::after,
+:is(.mdip-specs, .mdip-spec) details.specs-defer > summary::before,
+:is(.mdip-specs, .mdip-spec) details.specs-defer > summary::after {
+  display: none;
+  content: none;
+}
+
+/* Both of these are grids, so they must not inherit the flex row above.
+   The padding has to be restated too: Material reserves 2rem on the left of
+   every summary for the admonition icon it is not drawing here, which
+   otherwise indents the collapsible criterion rows past the plain ones. */
+:is(.mdip-specs, .mdip-spec) details.crit > summary.crit__head {
+  display: grid;
+  padding: .55rem .75rem;
+}
+:is(.mdip-specs, .mdip-spec) details.specs-defer > summary { gap: .45em; padding: .5em .7em; font-size: .68rem; }
+
+/* --------------------------------------------------------------------------
+   Motion preference
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mdip-specs *,
+  .mdip-spec * {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  :is(.mdip-specs, .mdip-spec) .specs-hero__glow,
+  :is(.mdip-specs, .mdip-spec) .spec-hero__glow { animation: none; }
+}
