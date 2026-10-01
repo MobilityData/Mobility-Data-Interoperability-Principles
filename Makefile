@@ -16,7 +16,6 @@ setup:
 # the hook module -- an edit to hooks/ or scripts/ triggers a rebuild but the
 # old code runs, so restart the server after changing those.
 serve: clean
-serve: clean
 	@echo "Starting ProperDocs server..."
 	@trap 'echo "Stopping ProperDocs server..."; pkill -f "properdocs serve"' SIGINT SIGTERM; \
 	properdocs serve -f config/en/properdocs.yml --dev-addr 127.0.0.1:8000 \
@@ -26,7 +25,6 @@ build: clean
 	mkdir -p generated  # Ensure the folder exists
 	properdocs build -f config/en/properdocs.yml --clean
 
-killserve:
 killserve:
 	pkill -f "properdocs serve"
 
