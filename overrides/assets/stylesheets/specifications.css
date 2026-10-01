@@ -150,18 +150,41 @@ body.mdip-fullbleed .md-main__inner { margin-top: 0; }
   background:
     radial-gradient(42% 46% at 18% 32%, rgba(27, 88, 164, .22), transparent 70%),
     radial-gradient(38% 42% at 78% 18%, rgba(72, 146, 236, .20), transparent 72%),
-    radial-gradient(30% 38% at 52% 78%, rgba(15, 123, 79, .12), transparent 70%);
+    radial-gradient(34% 40% at 52% 78%, rgba(250, 240, 214, .85), transparent 70%);
   filter: blur(12px);
   animation: mdip-drift 26s var(--ease) infinite alternate;
 }
 
-:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .specs-hero__glow,
-:is(.mdip-specs, .mdip-spec) [data-md-color-scheme="slate"] .spec-hero__glow {
+[data-md-color-scheme="slate"] :is(.mdip-specs, .mdip-spec) .specs-hero__glow,
+[data-md-color-scheme="slate"] :is(.mdip-specs, .mdip-spec) .spec-hero__glow {
   background:
     radial-gradient(42% 46% at 18% 32%, rgba(72, 146, 236, .26), transparent 70%),
     radial-gradient(38% 42% at 78% 18%, rgba(27, 88, 164, .30), transparent 72%),
-    radial-gradient(30% 38% at 52% 78%, rgba(95, 214, 160, .12), transparent 70%);
+    radial-gradient(34% 40% at 52% 78%, rgba(245, 232, 200, .07), transparent 70%);
 }
+
+/* --------------------------------------------------------------------------
+   Work-in-progress notice above the listing hero
+   -------------------------------------------------------------------------- */
+
+.mdip-specs .specs-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45em;
+  margin: 0;
+  padding: .45rem 1.1rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: .64rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.mdip-specs .specs-notice .mdip-i { color: var(--brand); }
+
+[data-md-color-scheme="slate"] .mdip-specs .specs-notice .mdip-i { color: var(--info); }
 
 @keyframes mdip-drift {
   from { transform: translate3d(-3%, -2%, 0) scale(1); }

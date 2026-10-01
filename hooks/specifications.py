@@ -358,6 +358,10 @@ def render_index(data, base):
 
     o.append('<div class="mdip-specs" data-specs-root>')
 
+    o.append('<p class="specs-notice" role="note">%s<span>The evaluation of the specifications '
+             'listed here is a work in progress. Findings may change as assessments are '
+             'reviewed.</span></p>' % icon("progress-wrench"))
+
     # ---- hero
     o.append('<header class="specs-hero">')
     o.append('<div class="specs-hero__glow" aria-hidden="true"></div>')
