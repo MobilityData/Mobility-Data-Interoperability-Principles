@@ -28,7 +28,9 @@ plugins:
   - privacy:
       links_attr_map:
         target: _blank
-  # - macros
+      assets_exclude:
+        - itxpt.org/*
+        - www.eticket-deutschland.de/*
 
 extra:
   analytics:
