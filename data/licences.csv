@@ -1,0 +1,18 @@
+id,name,category,url,note
+Apache-2.0,Apache License 2.0,open,https://www.apache.org/licenses/LICENSE-2.0,
+MIT,MIT License,open,https://opensource.org/license/mit,
+GPL-3.0,GNU General Public License v3.0,open,https://www.gnu.org/licenses/gpl-3.0.html,
+CC0-1.0,Creative Commons Zero v1.0 Universal,open,https://creativecommons.org/publicdomain/zero/1.0/,
+CC-BY-3.0,Creative Commons Attribution 3.0,open,https://creativecommons.org/licenses/by/3.0/,
+CC-BY-4.0,Creative Commons Attribution 4.0,open,https://creativecommons.org/licenses/by/4.0/,
+CC-BY-SA-2.0,Creative Commons Attribution-ShareAlike 2.0,open,https://creativecommons.org/licenses/by-sa/2.0/,
+CC-BY-NC-SA-4.0,Creative Commons Attribution-NonCommercial-ShareAlike 4.0,restricted,https://creativecommons.org/licenses/by-nc-sa/4.0/,Non-commercial use only.
+CC-BY-ND-4.0,Creative Commons Attribution-NoDerivatives 4.0,restricted,https://creativecommons.org/licenses/by-nd/4.0/,Redistribution of modified versions is not permitted.
+ODbL-1.0,Open Data Commons Open Database License v1.0,open,https://opendatacommons.org/licenses/odbl/1-0/,
+CDLA-Permissive-2.0,Community Data License Agreement - Permissive v2.0,open,https://cdla.dev/permissive-2-0/,
+OGL-3.0,Open Government Licence v3.0 (UK),open,https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/,
+Public-Domain,Public domain,open,https://en.wikipedia.org/wiki/Public_domain,
+Custom-Open,Custom open terms,open,,"Published under the maintainer's own terms, which permit free use."
+Crown-Copyright,Crown Copyright,restricted,https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/,
+Members-Only,Membership or accreditation required,closed,,"The text is obtainable only by members, subscribers or accredited parties."
+Proprietary,Proprietary / all rights reserved,closed,,Copyright-protected; the text must be purchased or is not licensed for reuse.

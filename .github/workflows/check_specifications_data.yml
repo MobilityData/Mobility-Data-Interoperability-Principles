@@ -1,0 +1,33 @@
+name: Check specification registry data
+
+# Validates the files in data/ against the vocabularies in scripts/spec_data.py, so a
+# change to the registry is checked before it is merged.
+on:
+  pull_request:
+    paths:
+      - 'data/**'
+      - 'scripts/spec_data.py'
+      - 'scripts/check_specs.py'
+      - 'scripts/spec_api.py'
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/**'
+      - 'scripts/spec_data.py'
+      - 'scripts/check_specs.py'
+      - 'scripts/spec_api.py'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PyYAML
+        run: pip install pyyaml
+      - name: Validate the registry files
+        run: python3 scripts/check_specs.py --export "$RUNNER_TEMP/export"
