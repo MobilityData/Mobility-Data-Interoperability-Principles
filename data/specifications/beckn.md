@@ -1,6 +1,6 @@
 ---
-short_name: Beckn
-homepage_url: https://beckn.io/
+short_name: ONDC (Open Network for Digital Commerce)
+homepage_url: https://ondc.org
 status: partially_compliant
 modes: [taxi_ridehail]
 licences:
@@ -14,7 +14,7 @@ principles:
   cost_restriction_free:
     verdict: compliant
     rationale: CC BY-NC-SA 4.0
-    evidence_url: https://github.com/beckn/protocol-specifications-v2?tab=License-1-ov-file
+    evidence_url: https://github.com/ONDC-Official
   publicly_documented:
     verdict: compliant
     rationale: 'Yes'
