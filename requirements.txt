@@ -1,5 +1,4 @@
 fontawesome_markdown==0.2.6
-mkdocs==1.6.1
 mkdocs-awesome-pages-plugin==2.10.1
 mkdocs-macros-plugin==1.5.0
 mkdocs-material==9.7.7

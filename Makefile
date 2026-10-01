@@ -8,6 +8,7 @@ clean:
 
 setup:
 	pip3 install --force-reinstall -r requirements.txt && \
+	pip3 install --upgrade --force-reinstall properdocs && \
 	pip3 install --upgrade --force-reinstall mkdocs-material
 
 # --watch: mkdocs only watches docs/ and the config by itself, so the
@@ -15,17 +16,17 @@ setup:
 # the hook module -- an edit to hooks/ or scripts/ triggers a rebuild but the
 # old code runs, so restart the server after changing those.
 serve: clean
-	@echo "Starting MkDocs server..."
-	@trap 'echo "Stopping MkDocs server..."; pkill -f "mkdocs serve"' SIGINT SIGTERM; \
-	mkdocs serve -f config/en/mkdocs.yml --dev-addr 127.0.0.1:8000 \
+	@echo "Starting ProperDocs server..."
+	@trap 'echo "Stopping ProperDocs server..."; pkill -f "properdocs serve"' SIGINT SIGTERM; \
+	properdocs serve -f config/en/properdocs.yml --dev-addr 127.0.0.1:8000 \
 		--watch overrides --watch hooks --watch scripts --watch data
 
 build: clean
 	mkdir -p generated  # Ensure the folder exists
-	mkdocs build -f config/en/mkdocs.yml --clean
+	properdocs build -f config/en/properdocs.yml --clean
 
 killserve:
-	pkill -f "mkdocs serve"
+	pkill -f "properdocs serve"
 
 # --- Specification registry (/specifications) -------------------------------
 # The pages and the /api/ files are built from data/ (see data/README.md).
