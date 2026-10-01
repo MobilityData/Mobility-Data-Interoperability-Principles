@@ -150,7 +150,7 @@ body.mdip-fullbleed .md-main__inner { margin-top: 0; }
   background:
     radial-gradient(42% 46% at 18% 32%, rgba(27, 88, 164, .22), transparent 70%),
     radial-gradient(38% 42% at 78% 18%, rgba(72, 146, 236, .20), transparent 72%),
-    radial-gradient(34% 40% at 52% 78%, rgba(250, 240, 214, .85), transparent 70%);
+    radial-gradient(34% 40% at 52% 78%, rgba(255, 255, 255, .9), transparent 70%);
   filter: blur(12px);
   animation: mdip-drift 26s var(--ease) infinite alternate;
 }
@@ -160,7 +160,7 @@ body.mdip-fullbleed .md-main__inner { margin-top: 0; }
   background:
     radial-gradient(42% 46% at 18% 32%, rgba(72, 146, 236, .26), transparent 70%),
     radial-gradient(38% 42% at 78% 18%, rgba(27, 88, 164, .30), transparent 72%),
-    radial-gradient(34% 40% at 52% 78%, rgba(245, 232, 200, .07), transparent 70%);
+    radial-gradient(34% 40% at 52% 78%, rgba(255, 255, 255, .05), transparent 70%);
 }
 
 /* --------------------------------------------------------------------------
