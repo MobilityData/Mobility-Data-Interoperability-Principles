@@ -11,6 +11,9 @@ first_release_year: 2015
 adoption:
   lifecycle: active
   tier: hundred_plus
+  adopters_count: 1500
+  adopters_count_updated: '2026-10-02'
+  adopters_registry_url: https://mobilitydatabase.org/feeds?gbfs=true
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:
