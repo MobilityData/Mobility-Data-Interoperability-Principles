@@ -2,7 +2,7 @@
 short_name: Schéma de données d'aménagements cyclables (France)
 full_name: Schéma de données d'aménagements cyclables
 homepage_url: https://schema.data.gouv.fr/etalab/schema-amenagements-cyclables/
-status: not_compliant
+status: partially_compliant
 modes: [bicycle]
 maintainers: [etalab]
 licences:
@@ -22,8 +22,8 @@ principles:
     rationale: 'Yes'
     evidence_url: https://schema.data.gouv.fr/etalab/schema-amenagements-cyclables/0.3.5/documentation.html
   independent_maintainer:
-    verdict: not_compliant
-    rationale: No (governmental)
+    verdict: partially_compliant
+    rationale: Governmental entity
     evidence_url: https://schema.data.gouv.fr/etalab/schema-amenagements-cyclables/
   structured_releases:
     verdict: compliant
