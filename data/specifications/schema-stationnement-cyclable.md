@@ -2,7 +2,7 @@
 short_name: Schéma de données pour le stationnement cyclable (France)
 full_name: Schéma de données pour le stationnement cyclable
 homepage_url: https://schema.data.gouv.fr/etalab/schema-stationnement-cyclable/
-status: not_compliant
+status: partially_compliant
 modes: [bicycle]
 maintainers: [etalab]
 licences:
@@ -21,7 +21,7 @@ principles:
     rationale: 'Yes'
     evidence_url: https://schema.data.gouv.fr/etalab/schema-stationnement-cyclable/
   independent_maintainer:
-    verdict: not_compliant
+    verdict: partially_compliant
     rationale: 'No'
     evidence_url: https://schema.data.gouv.fr/etalab/schema-stationnement-cyclable/
   structured_releases:
