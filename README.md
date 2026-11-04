@@ -22,6 +22,7 @@ Over 60 public and private signatories have committed to implementing the Princi
 - [MobilityData](http://mobilitydata.org)
 - [North Carolina Department of Transportation](https://www.ncdot.gov/)
 - [Oregon Department of Transportation](https://www.oregon.gov/odot/Pages/index.aspx)
+- [Open Mobility Foundation (OMF)](https://www.openmobilityfoundation.org/)
 - [Shared Use Mobility Center (SUMC)](https://sharedusemobilitycenter.org/)
 - [Taskar Center for Accessible Technology](https://tcat.cs.washington.edu/)
 - [Tri-Met](https://trimet.org/)
