@@ -23,6 +23,10 @@
   var SEP = "::";
   var DEFAULT_SORT = "default";
 
+  /* Where this file is served from, to find vendor/ next to it. Only known
+     while the script first runs. */
+  var SCRIPT_SRC = document.currentScript ? document.currentScript.src : "";
+
   function ready(fn) {
     if (document.readyState !== "loading") { fn(); }
     else { document.addEventListener("DOMContentLoaded", fn); }
@@ -35,6 +39,7 @@
     initStickyOffset();
     initList();
     initDetail();
+    initHistory();
     initDisclosureAnchors();
   });
 
@@ -450,5 +455,426 @@
     }, { rootMargin: "-30% 0px -60% 0px" });
 
     sections.forEach(function (s) { observer.observe(s); });
+  }
+
+  /* -------------------------------------------------------------- history */
+
+  /*
+   * The History section of a specification page, read from GitHub's public
+   * API in the browser so that an open pull request shows up as soon as it
+   * exists, without waiting for the site to be rebuilt.
+   *
+   * Two lists: pull requests still open on this entry's file ("Review in
+   * progress"), then the last MAX_CHANGES changes merged into the branch the
+   * site is built from. What a change did is worked out by reading the file
+   * before and after it (raw.githubusercontent.com, which has no rate limit)
+   * and comparing the two field by field.
+   *
+   * Without a token GitHub allows 60 API calls an hour per visitor, so every
+   * answer is kept in sessionStorage for a few minutes and shared between
+   * specification pages, and the per-commit lookups stop as soon as enough
+   * changes are found. If GitHub cannot be reached, the server-rendered link
+   * to the file's history stays as it is.
+   */
+  var MAX_CHANGES = 4;
+  var MAX_ROWS = 6;
+  var EXCERPT = 180;
+  var CACHE_MS = 10 * 60 * 1000;
+
+  function initHistory() {
+    var root = document.querySelector("[data-history]");
+    var labelsEl = root && root.querySelector("[data-history-labels]");
+    if (!root || !labelsEl || !window.fetch || !window.Promise) { return; }
+
+    var cfg = JSON.parse(labelsEl.textContent);
+    var repo = root.getAttribute("data-repo");
+    var branch = root.getAttribute("data-branch");
+    var path = root.getAttribute("data-path");
+    var body = root.querySelector("[data-history-body]");
+    var api = "https://api.github.com/repos/" + repo;
+    var fallback = body.innerHTML;
+
+    body.innerHTML = '<p class="hist__note">Loading changes from GitHub...</p>';
+
+    Promise.all([loadYaml(), openProposals(api, path), mergedChanges(api, repo, branch, path)])
+      .then(function (res) {
+        var open = res[1];
+        var merged = res[2];
+        return Promise.all([
+          Promise.all(open.map(function (pr) {
+            return diffOf(
+              raw(repo, pr.base, path),
+              raw(pr.headRepo || repo, pr.head, path)
+            ).then(function (d) { pr.diff = d; return pr; });
+          })),
+          Promise.all(merged.map(function (ch) {
+            return diffOf(
+              ch.parent ? raw(repo, ch.parent, path) : Promise.resolve(null),
+              raw(repo, ch.sha, path)
+            ).then(function (d) { ch.diff = d; return ch; });
+          }))
+        ]);
+      })
+      .then(function (lists) {
+        body.innerHTML = render(lists[0], lists[1]);
+      })
+      .catch(function () {
+        body.innerHTML = '<p class="hist__note">Recent changes could not be loaded from GitHub ' +
+          "right now.</p>" + fallback;
+      });
+
+    /* ---- rendering */
+
+    function render(open, merged) {
+      if (!open.length && !merged.length) {
+        return '<p class="hist__note">No change recorded on GitHub yet.</p>';
+      }
+      var h = "";
+      if (open.length) {
+        h += '<h3 class="hist__group">Proposed changes</h3><ol class="hist__list">' +
+          open.map(function (pr) {
+            return item({
+              tone: "info", ico: "source-pull", status: "Review in progress",
+              title: pr.title, number: pr.number, url: pr.url, date: pr.created,
+              people: [["Change proposed by", pr.user]],
+              text: pr.body, diff: pr.diff, after: "Proposed", folded: false
+            });
+          }).join("") + "</ol>";
+      }
+      if (merged.length) {
+        h += '<h3 class="hist__group">Recent changes</h3><ol class="hist__list">' +
+          merged.map(function (ch) {
+            var added = ch.diff && ch.diff.added;
+            return item({
+              tone: added ? "muted" : ch.pr ? "pass" : "muted",
+              ico: added ? "plus-circle-outline" : ch.pr ? "source-merge" : "source-commit",
+              status: added ? "Added to the registry" : ch.pr ? "Merged" : "Committed",
+              title: ch.title, number: ch.pr, url: ch.url, date: ch.date,
+              people: ch.pr
+                ? [["Change proposed by", ch.user], ["Change merged by", ch.mergedBy]]
+                : [["Changed by", ch.user]],
+              text: ch.body, diff: added ? null : ch.diff, after: "After", folded: true
+            });
+          }).join("") + "</ol>";
+      }
+      return h;
+    }
+
+    function item(it) {
+      var h = '<li class="hist__item">';
+      h += '<div class="hist__top"><span class="pill pill--' + it.tone + '">' +
+        cfg.icons[it.ico] + "<span>" + esc(it.status) + "</span></span>";
+      if (it.date) {
+        h += '<time class="hist__date" datetime="' + esc(it.date) + '">' +
+          esc(dateLabel(it.date)) + "</time>";
+      }
+      h += "</div>";
+      h += '<a class="hist__title" href="' + esc(it.url) + '" rel="noopener">' +
+        "<span>" + esc(it.title) + "</span>" +
+        (it.number ? '<span class="hist__num">#' + it.number + "</span>" : "") + "</a>";
+      var people = it.people.filter(function (p) { return p[1]; });
+      if (people.length) {
+        h += '<p class="hist__by">' + people.map(function (p) {
+          return "<span>" + esc(p[0]) + ' <a href="' + esc(p[1].url) + '" rel="noopener">@' +
+            esc(p[1].login) + "</a></span>";
+        }).join("") + "</p>";
+      }
+      var text = excerpt(it.text);
+      if (text) { h += '<p class="hist__desc">' + esc(text) + "</p>"; }
+      if (it.diff && it.diff.removed) {
+        h += '<p class="hist__note">' + cfg.icons["delete-outline"] +
+          " Removes this entry from the registry.</p>";
+      } else if (it.diff && it.diff.rows.length) {
+        var table = diffTable(it.diff.rows, it.after, it.url);
+        h += it.folded
+          ? '<details class="hist__more"><summary>What changed<span class="hist__n">' +
+            it.diff.rows.length + (it.diff.rows.length === 1 ? " field" : " fields") +
+            "</span></summary>" + table + "</details>"
+          : table;
+      }
+      return h + "</li>";
+    }
+
+    function diffTable(rows, after, url) {
+      var shown = rows.slice(0, MAX_ROWS);
+      var h = '<div class="hist__scroll"><table class="hist__t"><thead><tr>' +
+        '<th scope="col">Field</th><th scope="col">Before</th><th scope="col">' +
+        esc(after) + "</th></tr></thead><tbody>";
+      shown.forEach(function (r) {
+        h += '<tr><th scope="row">' + esc(r.label) + "</th>" + cell(r.before, "old") +
+          cell(r.after, "new") + "</tr>";
+      });
+      h += "</tbody></table></div>";
+      if (rows.length > shown.length) {
+        h += '<p class="hist__extra"><a href="' + esc(url) + '" rel="noopener">and ' +
+          (rows.length - shown.length) + " more on GitHub</a></p>";
+      }
+      return h;
+    }
+
+    function cell(value, kind) {
+      if (value === "") { return '<td class="hist__' + kind + ' is-empty">Not set</td>'; }
+      var short = value.length > 90 ? value.slice(0, 88).replace(/\s+\S*$/, "") + "..." : value;
+      return '<td class="hist__' + kind + '"' +
+        (short !== value ? ' title="' + esc(value) + '"' : "") + ">" + esc(short) + "</td>";
+    }
+
+    /* ---- comparing two versions of the file */
+
+    function diffOf(beforeP, afterP) {
+      return Promise.all([beforeP, afterP]).then(function (texts) {
+        if (texts[0] === null && texts[1] === null) { return null; }
+        if (texts[0] === null) { return { added: true, rows: [] }; }
+        if (texts[1] === null) { return { removed: true, rows: [] }; }
+        var a = flatten(texts[0]);
+        var b = flatten(texts[1]);
+        if (!a || !b) { return null; }
+        var keys = Object.keys(cfg.fields).filter(function (k) { return k in a || k in b; });
+        Object.keys(a).concat(Object.keys(b)).forEach(function (k) {
+          if (keys.indexOf(k) < 0) { keys.push(k); }
+        });
+        var rows = [];
+        keys.forEach(function (k) {
+          var x = show(k, a[k]);
+          var y = show(k, b[k]);
+          if (x !== y) { rows.push({ label: cfg.fields[k] || k, before: x, after: y }); }
+        });
+        return { rows: rows };
+      });
+    }
+
+    /* The file's fields as { "dotted.path": value }, plus its description. */
+    function flatten(text) {
+      text = text.replace(/\r\n/g, "\n");
+      var m = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(text);
+      if (!m) { return null; }
+      var front;
+      try { front = window.jsyaml.load(m[1], { schema: window.jsyaml.CORE_SCHEMA }) || {}; }
+      catch (e) { return null; }
+      var out = {};
+      Object.keys(front).forEach(function (k) {
+        var v = front[k];
+        if (k === "adoption" && isObj(v)) {
+          Object.keys(v).forEach(function (j) { out[k + "." + j] = v[j]; });
+        } else if (k === "principles" && isObj(v)) {
+          Object.keys(v).forEach(function (p) {
+            if (!isObj(v[p])) { return; }
+            Object.keys(v[p]).forEach(function (j) {
+              out["principles." + p + "." + j] = v[p][j];
+            });
+          });
+        } else if (k === "licences" && Array.isArray(v)) {
+          out[k] = v.map(function (l) {
+            if (!isObj(l)) { return String(l); }
+            var scopes = [].concat(l.scopes || []);
+            return l.id + (scopes.length ? " (" + scopes.join(", ") + ")" : "");
+          });
+        } else {
+          out[k] = v;
+        }
+      });
+      var d = /^#\s+Description\s*$([\s\S]*?)(?=^#\s|$(?![\s\S]))/m.exec(m[2]);
+      out.description = d ? d[1].trim() : "";
+      return out;
+    }
+
+    /* One value as the page words it: vocabulary labels, Yes/No, numbers. */
+    function show(key, v) {
+      if (v === undefined || v === null || v === "") { return ""; }
+      var vocab = cfg.values[/^principles\..+\.verdict$/.test(key) ? "verdict" : key];
+      var one = function (x) {
+        if (x === true) { return "Yes"; }
+        if (x === false) { return "No"; }
+        if (typeof x === "number" && key !== "first_release_year") {
+          return x.toLocaleString("en-US");
+        }
+        if (isObj(x)) { return JSON.stringify(x); }
+        return vocab && vocab[x] ? vocab[x] : String(x);
+      };
+      return Array.isArray(v) ? v.map(one).join(", ") : one(v);
+    }
+  }
+
+  /* ---- what GitHub knows */
+
+  function openProposals(api, path) {
+    return getJSON(api + "/pulls?state=open&per_page=100", function (list) {
+      return list.map(function (p) {
+        return {
+          number: p.number, title: p.title, url: p.html_url, body: p.body || "",
+          created: p.created_at, user: person(p.user), base: p.base.sha, head: p.head.sha,
+          headRepo: p.head.repo ? p.head.repo.full_name : null
+        };
+      });
+    }).then(function (prs) {
+      return Promise.all(prs.slice(0, 40).map(function (pr) {
+        return getJSON(api + "/pulls/" + pr.number + "/files?per_page=100", function (files) {
+          return files.map(function (f) { return [f.filename, f.previous_filename || ""]; });
+        }, pr.head).then(function (files) {
+          var touches = files.some(function (f) { return f[0] === path || f[1] === path; });
+          return touches ? pr : null;
+        });
+      }));
+    }).then(function (prs) { return prs.filter(Boolean); });
+  }
+
+  /*
+   * The latest changes on the branch, one per pull request. A squash merge
+   * names its pull request in the message ("Title (#12)"), as does a merge
+   * commit; any other commit is looked up once to find whether it came in
+   * through a pull request at all. Commits of the same pull request are
+   * grouped, and the file before the oldest of them is the "before" side.
+   */
+  function mergedChanges(api, repo, branch, path) {
+    var url = api + "/commits?sha=" + encodeURIComponent(branch) + "&path=" +
+      encodeURIComponent(path) + "&per_page=30";
+    return getJSON(url, function (list) {
+      return list.map(function (c) {
+        return {
+          sha: c.sha, url: c.html_url, date: c.commit.committer.date,
+          message: c.commit.message, user: person(c.author),
+          parent: c.parents.length ? c.parents[0].sha : null
+        };
+      });
+    }).then(function (commits) {
+      var changes = [];
+      var byPr = {};
+      var lookups = 0;
+
+      function step(i) {
+        if (i >= commits.length) { return Promise.resolve(); }
+        var c = commits[i];
+        var first = c.message.split("\n")[0];
+        var m = /\(#(\d+)\)\s*$/.exec(first) || /^Merge pull request #(\d+)/.exec(first);
+        var found = m ? Promise.resolve(Number(m[1]))
+          : lookups++ < 8
+            ? getJSON(api + "/commits/" + c.sha + "/pulls", function (prs) {
+              var pr = prs.filter(function (p) { return p.merged_at; })[0];
+              return pr ? pr.number : 0;
+            }).catch(function () { return 0; })
+            : Promise.resolve(0);
+        return found.then(function (num) {
+          if (num && byPr[num]) {
+            byPr[num].parent = c.parent;       // older commit of the same PR
+          } else {
+            if (changes.length === MAX_CHANGES) { return; }
+            var ch = {
+              sha: c.sha, parent: c.parent, pr: num || 0, url: c.url, date: c.date,
+              title: first, body: c.message.split("\n").slice(1).join("\n"), user: c.user
+            };
+            changes.push(ch);
+            if (num) { byPr[num] = ch; }
+          }
+          return step(i + 1);
+        });
+      }
+
+      return step(0).then(function () {
+        return Promise.all(changes.map(function (ch) {
+          if (!ch.pr) { return ch; }
+          return getJSON(api + "/pulls/" + ch.pr, function (p) {
+            return {
+              title: p.title, url: p.html_url, body: p.body || "", user: person(p.user),
+              mergedBy: person(p.merged_by), merged: p.merged_at
+            };
+          }).then(function (p) {
+            ch.title = p.title;
+            ch.url = p.url;
+            ch.body = p.body;
+            ch.user = p.user;
+            ch.mergedBy = p.mergedBy;
+            ch.date = p.merged || ch.date;
+            return ch;
+          }, function () { return ch; });
+        }));
+      });
+    });
+  }
+
+  function person(u) {
+    return u && u.login ? { login: u.login, url: u.html_url } : null;
+  }
+
+  /* A file at one commit, or null where it does not exist there. Commits
+     never change, so the answer is kept for the whole session. */
+  var RAW = {};
+  function raw(repo, sha, path) {
+    var url = "https://raw.githubusercontent.com/" + repo + "/" + sha + "/" +
+      path.split("/").map(encodeURIComponent).join("/");
+    if (!RAW[url]) {
+      RAW[url] = fetch(url).then(function (r) {
+        if (r.status === 404) { return null; }
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.text();
+      });
+    }
+    return RAW[url];
+  }
+
+  /* GET from the API, keep only what `pick` returns, and remember it for
+     CACHE_MS. `version` invalidates an entry early (a pull request's head). */
+  function getJSON(url, pick, version) {
+    var key = "mdip-gh:" + url + (version ? "@" + version : "");
+    try {
+      var hit = JSON.parse(sessionStorage.getItem(key));
+      if (hit && Date.now() - hit.t < CACHE_MS) { return Promise.resolve(hit.v); }
+    } catch (e) { /* storage off or full: fetch */ }
+    return fetch(url, { headers: { Accept: "application/vnd.github+json" } })
+      .then(function (r) {
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.json();
+      })
+      .then(function (json) {
+        var v = pick(json);
+        try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), v: v })); }
+        catch (e) { /* not cached, still shown */ }
+        return v;
+      });
+  }
+
+  /* js-yaml, served next to this script, loaded only on pages that need it. */
+  var yamlLoad = null;
+  function loadYaml() {
+    if (window.jsyaml) { return Promise.resolve(); }
+    if (!yamlLoad) {
+      yamlLoad = new Promise(function (resolve, reject) {
+        var s = document.createElement("script");
+        s.src = SCRIPT_SRC.replace(/[^/]*$/, "") + "vendor/js-yaml.min.js";
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    return yamlLoad;
+  }
+
+  /* The first lines of a pull request description, as plain text: headings
+     ("## Summary") and list bullets are template scaffolding, not content. */
+  function excerpt(text) {
+    var t = (text || "")
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/^\s*#+\s.*$/gm, " ")
+      .replace(/^\s*(?:[-*+]|\d+\.)\s+/gm, " ")
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/[*`]+/g, "")
+      .replace(/^\s*>\s?/gm, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (t.length <= EXCERPT) { return t; }
+    return t.slice(0, EXCERPT).replace(/\s+\S*$/, "").replace(/[\s.,;:-]+$/, "") + "...";
+  }
+
+  function dateLabel(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) { return iso; }
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  function isObj(v) { return v && typeof v === "object" && !Array.isArray(v); }
+
+  function esc(s) {
+    return String(s === undefined || s === null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 })();

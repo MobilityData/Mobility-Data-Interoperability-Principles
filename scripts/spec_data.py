@@ -102,6 +102,9 @@ MODES = OrderedDict([
     ("microtransit_drt", "Microtransit/DRT"),
     ("taxi_ridehail", "Taxi/Ridehail"),
     ("bicycle", "Bicycle"),
+    ("bikeshare", "Bikeshare"),
+    ("shared_scooter", "Shared scooter"),
+    ("carsharing", "Carsharing"),
     ("pedestrian_accessibility", "Pedestrian/Accessibility"),
     ("parking", "Parking"),
 ])
@@ -183,7 +186,12 @@ def read_entry(path):
     `# Description` and any section added later are read the same way.
     """
     with open(path, encoding="utf-8") as fh:
-        text = fh.read().replace("\r\n", "\n")
+        return parse_entry(fh.read())
+
+
+def parse_entry(text):
+    """`read_entry` on text already in memory, such as a past git revision."""
+    text = text.replace("\r\n", "\n")
     if not text.startswith("---\n"):
         raise ValueError("does not start with a --- front matter block")
     end = text.find("\n---\n", 4)
