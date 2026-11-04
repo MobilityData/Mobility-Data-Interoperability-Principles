@@ -9,7 +9,7 @@ licences:
 - id: CC-BY-4.0
   scopes: [specification]
 licence_evidence_url: https://github.com/openmobilityfoundation/mobility-data-specification/blob/main/LICENSE
-first_release_year: 2019
+first_release_year: 2018
 adoption:
   lifecycle: active
   tier: hundred_plus
