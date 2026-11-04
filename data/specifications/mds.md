@@ -3,18 +3,18 @@ short_name: MDS
 full_name: Mobility Data Specification
 homepage_url: https://github.com/openmobilityfoundation/mobility-data-specification/tree/release-2.1.0
 status: compliant
-modes: [microtransit_drt, taxi_ridehail, bicycle]
+modes: [microtransit_drt, taxi_ridehail, bicycle, public_transport]
 maintainers: [omf]
 licences:
 - id: CC-BY-4.0
   scopes: [specification]
 licence_evidence_url: https://github.com/openmobilityfoundation/mobility-data-specification/blob/main/LICENSE
-first_release_year: 2018
+first_release_year: 2019
 adoption:
   lifecycle: active
   tier: hundred_plus
-  adopters_count: 258
-  adopters_count_updated: '2026-09-28'
+  adopters_count: 1200
+  adopters_count_updated: '2026-11-04'
   adopters_registry_url: https://www.openmobilityfoundation.org/mds-users/
   confirmed_by_maintainer: true
 principles:
