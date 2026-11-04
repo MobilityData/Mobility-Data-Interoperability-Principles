@@ -3,7 +3,7 @@ short_name: GBFS
 full_name: General Bikeshare Feed Specification
 homepage_url: https://gbfs.org/
 status: compliant
-modes: [bicycle]
+modes: [bikeshare, shared scooter, carsharing]
 maintainers: [mobilitydata]
 licences:
 - id: CC-BY-3.0
