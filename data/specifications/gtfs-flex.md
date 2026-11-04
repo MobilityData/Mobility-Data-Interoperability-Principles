@@ -29,7 +29,8 @@ principles:
     evidence_url: https://creativecommons.org/licenses/by/3.0/
   independent_maintainer:
     verdict: compliant
-    rationale: International non profit organization
+    rationale: |-
+      International non profit organization.
       Official Maintainer: MobilityData.
 
       (GitHub repo still held by Google. Google delegated admin rights to MobilityData.)
