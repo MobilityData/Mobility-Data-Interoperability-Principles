@@ -6,11 +6,14 @@ status: compliant
 modes: [bicycle]
 maintainers: [mobilitydata]
 licences:
-- id: Apache-2.0
+- id: CC-BY-3.0
 first_release_year: 2015
 adoption:
   lifecycle: active
   tier: hundred_plus
+  adopters_count: 1536
+  adopters_count_updated: '2026-11-04'
+  adopters_registry_url: https://mobilitydatabase.org/feeds?gbfs=true
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:
