@@ -11,6 +11,9 @@ first_release_year: 2021
 adoption:
   lifecycle: active
   tier: early
+  adopters_count: 35
+  adopters_count_updated: '2026-11-04'
+  adopters_registry_url: https://github.com/openmobilityfoundation/curb-data-specification/wiki#cds-users
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:
