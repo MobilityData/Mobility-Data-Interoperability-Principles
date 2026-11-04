@@ -22,7 +22,7 @@ principles:
     evidence_url: https://schema.data.gouv.fr/etalab/schema-stationnement-cyclable/
   independent_maintainer:
     verdict: partially_compliant
-    rationale: 'No'
+    rationale: Governmental entity
     evidence_url: https://schema.data.gouv.fr/etalab/schema-stationnement-cyclable/
   structured_releases:
     verdict: compliant
