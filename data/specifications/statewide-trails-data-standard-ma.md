@@ -22,8 +22,8 @@ principles:
     rationale: Yes, viewable on the MA Statewide Trails Database Initiative website
     evidence_url: https://ma-statewide-trails-database-hub-massgis.hub.arcgis.com/pages/trails-standard~8a9e63c5a54d4eefb9d37b6d7b74ff37
   independent_maintainer:
-    verdict: not_compliant
-    rationale: No. The steward is an inter-agency initiative led by the Massachusetts state government.
+    verdict: partially_compliant
+    rationale: The steward is an inter-agency initiative led by the Massachusetts state government.
     evidence_url: https://ma-statewide-trails-database-hub-massgis.hub.arcgis.com/pages/trails-standard~8a9e63c5a54d4eefb9d37b6d7b74ff37
   structured_releases:
     verdict: not_compliant
