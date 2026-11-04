@@ -23,7 +23,7 @@ principles:
     rationale: Only the technical XML schema and API endpoints are published.
     evidence_url: https://github.com/VDVde/OJP
   independent_maintainer:
-    verdict: not_compliant
+    verdict: partially_compliant
     rationale: Governmental institution
     evidence_url: https://www.itsstandards.eu/
   structured_releases:
