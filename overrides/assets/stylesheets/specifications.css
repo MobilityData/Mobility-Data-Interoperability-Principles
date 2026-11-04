@@ -1673,6 +1673,269 @@ buttons
 :is(.mdip-specs, .mdip-spec) li.spec-row { display: block; }
 :is(.mdip-specs, .mdip-spec) li.spec-row[hidden] { display: none; }
 
+/* -- adoption: known adopters over time ------------------------------------ */
+
+/* One series, so no legend: the heading names it. Time runs across, the count
+   runs up from zero, and only the latest value is written out. The plot is a
+   stretched SVG for the line, with the dots and labels laid over it in HTML so
+   they keep their shape at any width. */
+:is(.mdip-specs, .mdip-spec) .adopt-hist { margin-top: 1.1rem; }
+:is(.mdip-specs, .mdip-spec) .adopt-hist h3,
+:is(.mdip-specs, .mdip-spec) .hist__group {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  margin: 0 0 .5rem;
+  color: var(--ink-3);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+/* Material centres a figure and shrinks it to its content (`width:
+   fit-content`, a flex column); the chart is a block as wide as the section. */
+:is(.mdip-specs, .mdip-spec) figure.adopt-chart {
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 1.1rem 1rem .6rem 3.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+}
+
+:is(.mdip-specs, .mdip-spec) .adopt-chart__plot { position: relative; height: 8.5rem; }
+
+:is(.mdip-specs, .mdip-spec) .adopt-chart__plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+:is(.mdip-specs, .mdip-spec) .adopt-chart__grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+:is(.mdip-specs, .mdip-spec) .adopt-chart__base { stroke: var(--line-strong); stroke-width: 1; }
+:is(.mdip-specs, .mdip-spec) .adopt-chart__area { fill: var(--brand); opacity: .08; }
+:is(.mdip-specs, .mdip-spec) .adopt-chart__line {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+:is(.mdip-specs, .mdip-spec) .adopt-chart__y {
+  position: absolute;
+  right: calc(100% + .55rem);
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  font-size: .58rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+:is(.mdip-specs, .mdip-spec) .adopt-chart__dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 2px var(--surface);
+  transform: translate(-50%, -50%);
+  outline: none;
+}
+/* A larger, invisible hit area than the dot itself. */
+:is(.mdip-specs, .mdip-spec) .adopt-chart__dot::before { content: ""; position: absolute; inset: -9px; border-radius: 50%; }
+:is(.mdip-specs, .mdip-spec) .adopt-chart__dot:focus-visible { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--brand); }
+
+:is(.mdip-specs, .mdip-spec) .adopt-chart__tip {
+  position: absolute;
+  bottom: calc(100% + .45rem);
+  left: 50%;
+  z-index: 2;
+  padding: .2rem .45rem;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: .6rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s var(--ease);
+}
+:is(.mdip-specs, .mdip-spec) .adopt-chart__dot.is-last .adopt-chart__tip { left: auto; right: -.3rem; transform: none; }
+:is(.mdip-specs, .mdip-spec) .adopt-chart__dot:is(:hover, :focus) .adopt-chart__tip { opacity: 1; }
+
+:is(.mdip-specs, .mdip-spec) .adopt-chart__val {
+  position: absolute;
+  transform: translate(-100%, -170%);
+  color: var(--ink);
+  font-size: .7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+:is(.mdip-specs, .mdip-spec) .adopt-chart__x {
+  display: flex;
+  justify-content: space-between;
+  margin-top: .45rem;
+  color: var(--ink-3);
+  font-size: .58rem;
+}
+
+/* The slate scheme sets its attribute on <body>, an ancestor of the roots. */
+[data-md-color-scheme="slate"] .mdip-spec .adopt-chart__line { stroke: var(--info); }
+[data-md-color-scheme="slate"] .mdip-spec .adopt-chart__area { fill: var(--info); }
+[data-md-color-scheme="slate"] .mdip-spec .adopt-chart__dot { background: var(--info); }
+[data-md-color-scheme="slate"] .mdip-spec .adopt-chart__dot:focus-visible { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--info); }
+
+/* -- history --------------------------------------------------------------- */
+
+/* Each change is one row of a single card: what state it is in, what it is
+   called, who proposed and merged it, and the start of its description. The
+   field-by-field table is open for proposals, which are what a reader comes
+   to check, and folded for merged changes, whose result is already the page. */
+:is(.mdip-specs, .mdip-spec) .hist__group { margin-top: 1rem; }
+:is(.mdip-specs, .mdip-spec) .hist__group:first-child { margin-top: 0; }
+
+/* Element and class together: Material's `[dir=ltr] .md-typeset ol li`
+   indents and numbers list items at 0-2-2. */
+:is(.mdip-specs, .mdip-spec) ol.hist__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+
+:is(.mdip-specs, .mdip-spec) ol.hist__list > li.hist__item { margin: 0; padding: .7rem .9rem .75rem; }
+:is(.mdip-specs, .mdip-spec) ol.hist__list > li.hist__item + li.hist__item { border-top: 1px solid var(--line); }
+
+:is(.mdip-specs, .mdip-spec) .hist__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .35rem;
+}
+:is(.mdip-specs, .mdip-spec) .hist__date {
+  color: var(--ink-3);
+  font-size: .62rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+:is(.mdip-specs, .mdip-spec) .hist__title {
+  display: inline;
+  color: var(--ink) !important;
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+}
+:is(.mdip-specs, .mdip-spec) .hist__title:hover span:first-child { color: var(--brand); text-decoration: underline; }
+:is(.mdip-specs, .mdip-spec) .hist__num {
+  margin-left: .35em;
+  color: var(--ink-3);
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: .66rem;
+  font-weight: 500;
+}
+
+:is(.mdip-specs, .mdip-spec) .hist__by {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .1rem .9rem;
+  margin: .25rem 0 0;
+  color: var(--ink-3);
+  font-size: .64rem;
+}
+:is(.mdip-specs, .mdip-spec) .hist__by a { font-weight: 600; }
+
+:is(.mdip-specs, .mdip-spec) .hist__desc {
+  margin: .35rem 0 0;
+  color: var(--ink-2);
+  font-size: .66rem;
+  line-height: 1.55;
+}
+
+:is(.mdip-specs, .mdip-spec) .hist__scroll {
+  margin-top: .55rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  overflow-x: auto;
+}
+:is(.mdip-specs, .mdip-spec) .hist__t {
+  display: table;
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: .64rem;
+  line-height: 1.45;
+}
+:is(.mdip-specs, .mdip-spec) .hist__t :is(th, td) {
+  padding: .35rem .6rem;
+  border: 0;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+:is(.mdip-specs, .mdip-spec) .hist__t thead th {
+  border-top: 0;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+:is(.mdip-specs, .mdip-spec) .hist__t tbody th { width: 34%; color: var(--ink-2); font-weight: 600; }
+:is(.mdip-specs, .mdip-spec) .hist__old { color: var(--ink-3); }
+:is(.mdip-specs, .mdip-spec) .hist__new { color: var(--ink); font-weight: 600; }
+:is(.mdip-specs, .mdip-spec) .hist__t .is-empty { font-style: italic; font-weight: 400; color: var(--ink-3); }
+
+:is(.mdip-specs, .mdip-spec) details.hist__more { margin-top: .4rem; }
+:is(.mdip-specs, .mdip-spec) details.hist__more > summary {
+  display: inline-flex;
+  gap: .45em;
+  padding: 0;
+  color: var(--ink-3);
+  font-size: .62rem;
+  cursor: pointer;
+}
+:is(.mdip-specs, .mdip-spec) details.hist__more > summary:hover { color: var(--ink); }
+:is(.mdip-specs, .mdip-spec) details.hist__more > summary::-webkit-details-marker { display: none; }
+:is(.mdip-specs, .mdip-spec) .hist__n { color: var(--ink-3); font-weight: 400; }
+:is(.mdip-specs, .mdip-spec) .hist__n::before { content: "\00b7"; margin-right: .45em; }
+
+:is(.mdip-specs, .mdip-spec) .hist__extra { margin: .35rem 0 0; font-size: .62rem; }
+
+:is(.mdip-specs, .mdip-spec) .hist__note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35em;
+  margin: .35rem 0 0;
+  color: var(--ink-3);
+  font-size: .66rem;
+}
+:is(.mdip-specs, .mdip-spec) .hist__body > .hist__note:first-child { margin-top: 0; }
+:is(.mdip-specs, .mdip-spec) .hist__foot { margin: .8rem 0 0; }
+
 /* --------------------------------------------------------------------------
    Material <details> overrides
 
@@ -1686,7 +1949,8 @@ buttons
 :is(.mdip-specs, .mdip-spec) details.facet,
 :is(.mdip-specs, .mdip-spec) details.disclosure,
 :is(.mdip-specs, .mdip-spec) details.crit,
-:is(.mdip-specs, .mdip-spec) details.specs-defer {
+:is(.mdip-specs, .mdip-spec) details.specs-defer,
+:is(.mdip-specs, .mdip-spec) details.hist__more {
   display: block;
   overflow: visible;
   padding: 0;
@@ -1718,7 +1982,8 @@ buttons
 :is(.mdip-specs, .mdip-spec) details.facet > summary,
 :is(.mdip-specs, .mdip-spec) details.disclosure > summary,
 :is(.mdip-specs, .mdip-spec) details.crit > summary,
-:is(.mdip-specs, .mdip-spec) details.specs-defer > summary {
+:is(.mdip-specs, .mdip-spec) details.specs-defer > summary,
+:is(.mdip-specs, .mdip-spec) details.hist__more > summary {
   display: flex;
   align-items: center;
   /* Material bleeds the admonition title past its box with `margin: 0 -.6rem`,
@@ -1756,7 +2021,9 @@ buttons
 :is(.mdip-specs, .mdip-spec) details.crit > summary::before,
 :is(.mdip-specs, .mdip-spec) details.crit > summary::after,
 :is(.mdip-specs, .mdip-spec) details.specs-defer > summary::before,
-:is(.mdip-specs, .mdip-spec) details.specs-defer > summary::after {
+:is(.mdip-specs, .mdip-spec) details.specs-defer > summary::after,
+:is(.mdip-specs, .mdip-spec) details.hist__more > summary::before,
+:is(.mdip-specs, .mdip-spec) details.hist__more > summary::after {
   display: none;
   content: none;
 }
@@ -1770,6 +2037,8 @@ buttons
   padding: .55rem .75rem;
 }
 :is(.mdip-specs, .mdip-spec) details.specs-defer > summary { gap: .45em; padding: .5em .7em; font-size: .68rem; }
+:is(.mdip-specs, .mdip-spec) details.hist__more { border: 0; margin-top: .4rem; }
+:is(.mdip-specs, .mdip-spec) details.hist__more > summary { display: inline-flex; padding: 0; color: var(--ink-3); font-size: .62rem; }
 
 /* --------------------------------------------------------------------------
    Motion preference

@@ -85,7 +85,7 @@ Travel information: Transit schedules, geography, fares.
 | `full_name` | Free text. |
 | `homepage_url` | URL. |
 | `status` | The coalition's overall finding: `compliant`, `partially_compliant`, `not_compliant`, `inactive` or `under_review`. |
-| `modes` | Any of `public_transport`, `microtransit_drt`, `taxi_ridehail`, `bicycle`, `pedestrian_accessibility`, `parking`. Empty shows as "Unclassified". |
+| `modes` | Any of `public_transport`, `microtransit_drt`, `taxi_ridehail`, `bicycle`, `bikeshare`, `shared_scooter`, `carsharing`, `pedestrian_accessibility`, `parking`. Empty shows as "Unclassified". |
 | `maintainers` | Organization ids: file names in `organizations/`. |
 | `licences` | A list of licences, each with an `id` from `licences.csv` and optional `scopes`: `specification`, `documentation`, `code`, `data`. Empty means no licence is stated. |
 | `licence_evidence_url` | URL of the licence text, when it is not the licence's own page. |

@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
 import spec_api  # noqa: E402  (path set above)
 import spec_data  # noqa: E402
+import spec_history  # noqa: E402
 
 SECTION = "specifications"
 
@@ -642,6 +643,7 @@ def render_detail(spec, data, base):
         sections.append(("adoption", "Adoption", "account-group"))
     if spec["maintainers"]:
         sections.append(("maintainers", "Maintainers", "domain"))
+    sections.append(("history", "History", "history"))
     o.append('<nav class="spec-nav" aria-label="On this page"><ul>')
     for sid, label, ico in sections:
         o.append('<li><a href="#%s">%s<span>%s</span></a></li>' % (sid, icon(ico), escape(label)))
@@ -776,7 +778,12 @@ def render_detail(spec, data, base):
         if spec["adopters_registry"]:
             o.append(dl_row("database-outline", "Adopters registry",
                             ext_link(spec["adopters_registry"], "Open registry")))
-        o.append("</dl></section>")
+        o.append("</dl>")
+        series = spec_history.adopters_series(spec)
+        if len(series) >= 2:
+            o.append('<div class="adopt-hist"><h3>%s<span>History</span></h3>%s</div>'
+                     % (icon("chart-line"), render_adopters_chart(series)))
+        o.append("</section>")
 
     # ---- maintainers
     if spec["maintainers"]:
@@ -809,12 +816,160 @@ def render_detail(spec, data, base):
             o.append("</ul></div>")
         o.append("</section>")
 
+    o.append(render_history(spec, data))
+
     o.append("</div>")  # body
 
     o.append(render_contribute(data, spec))
 
     o.append("</div>")
     return "\n".join(o)
+
+
+def nice_ceiling(value):
+    """A round number a little above `value`, for the top of a chart axis."""
+    import math
+    if value <= 0:
+        return 1
+    target = value * 1.1
+    mag = 10 ** math.floor(math.log10(target))
+    for step in (1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10):
+        if step * mag >= target:
+            return int(step * mag) if step * mag >= 1 else step * mag
+    return 10 * mag
+
+
+def short_date(iso):
+    import datetime
+    d = datetime.date.fromisoformat(iso)
+    return "%d %s %d" % (d.day, d.strftime("%b"), d.year)
+
+
+def render_adopters_chart(points):
+    """Known adopters over time: one line, time across, count up from zero.
+
+    Deliberately bare: no legend (there is one series and the heading names
+    it), two dates and three values on the axes, and a direct label on the
+    latest count only. Every point carries its exact value and date on hover
+    or focus, and the same numbers are in a table for screen readers.
+
+    The line is drawn in a stretched 100x100 SVG and the dots and labels are
+    HTML placed in percentages on top of it, so the plot fills any width
+    without distorting the dots or the text.
+    """
+    import datetime
+    days = [datetime.date.fromisoformat(p["date"]).toordinal() for p in points]
+    span = max(days[-1] - days[0], 1)
+    top = nice_ceiling(max(p["count"] for p in points))
+    xy = [((d - days[0]) * 100.0 / span, 100 - p["count"] * 100.0 / top)
+          for d, p in zip(days, points)]
+    line = " ".join("%.2f,%.2f" % c for c in xy)
+
+    o = ['<figure class="adopt-chart">']
+    o.append('<div class="adopt-chart__plot">')
+    for value, pos in ((top, 0), (top / 2.0, 50), (0, 100)):
+        o.append('<span class="adopt-chart__y" style="top:%d%%" aria-hidden="true">%s</span>'
+                 % (pos, "{:,}".format(int(value)) if value == int(value) else value))
+    o.append('<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" '
+             'focusable="false">')
+    for y in (0, 50):
+        o.append('<line class="adopt-chart__grid" x1="0" x2="100" y1="%d" y2="%d" '
+                 'vector-effect="non-scaling-stroke"/>' % (y, y))
+    o.append('<line class="adopt-chart__base" x1="0" x2="100" y1="100" y2="100" '
+             'vector-effect="non-scaling-stroke"/>')
+    o.append('<polygon class="adopt-chart__area" points="0,100 %s 100,100"/>' % line)
+    o.append('<polyline class="adopt-chart__line" points="%s" '
+             'vector-effect="non-scaling-stroke"/>' % line)
+    o.append("</svg>")
+    for n, ((x, y), p) in enumerate(zip(xy, points)):
+        last = n == len(points) - 1
+        tip = "%s adopters, %s" % ("{:,}".format(p["count"]), short_date(p["date"]))
+        o.append('<span class="adopt-chart__dot%s" style="left:%.2f%%;top:%.2f%%" tabindex="0" '
+                 'aria-label="%s"><span class="adopt-chart__tip" aria-hidden="true">%s</span>'
+                 "</span>" % (" is-last" if last else "", x, y, escape(tip), escape(tip)))
+    o.append('<span class="adopt-chart__val" style="left:%.2f%%;top:%.2f%%" aria-hidden="true">'
+             "%s</span>" % (xy[-1][0], xy[-1][1], "{:,}".format(points[-1]["count"])))
+    o.append("</div>")
+    o.append('<div class="adopt-chart__x" aria-hidden="true"><span>%s</span><span>%s</span></div>'
+             % (short_date(points[0]["date"]), short_date(points[-1]["date"])))
+    o.append('<table class="u-sr"><caption>Known adopters over time</caption><thead><tr>'
+             '<th scope="col">Date</th><th scope="col">Known adopters</th></tr></thead><tbody>')
+    for p in points:
+        o.append("<tr><td>%s</td><td>%s</td></tr>"
+                 % (escape(p["date"]), "{:,}".format(p["count"])))
+    o.append("</tbody></table></figure>")
+    return "".join(o)
+
+
+def history_labels(data):
+    """Field names and value labels the History script needs, in one object.
+
+    The script compares two versions of the file as written, so it sees keys
+    joined with dots ("adoption.adopters_count") and ids
+    ("partially_compliant", "mobilitydata"). These are the words the rest of
+    the page uses for the same things.
+    """
+    fields = {
+        "short_name": "Short name",
+        "full_name": "Full name",
+        "homepage_url": "Homepage",
+        "status": "MDIP status",
+        "modes": "Mode",
+        "maintainers": "Maintainers",
+        "licences": "Licence",
+        "licence_evidence_url": "Licence text",
+        "first_release_year": "First release",
+        "adoption.lifecycle": "Lifecycle",
+        "adoption.tier": "Adoption tier",
+        "adoption.adopters_count": "Known adopters",
+        "adoption.adopters_count_updated": "Adopters counted on",
+        "adoption.adopters_registry_url": "Adopters registry",
+        "adoption.confirmed_by_maintainer": "Confirmed by maintainer",
+        "description": "Description",
+    }
+    for c in data["criteria"]:
+        base = "principles.%s." % c["key"]
+        fields[base + "verdict"] = c["label"]
+        fields[base + "rationale"] = "%s: rationale" % c["label"]
+        fields[base + "evidence_url"] = "%s: evidence" % c["label"]
+    values = {
+        "status": dict((k, v["label"]) for k, v in spec_data.STATUS.items()),
+        "verdict": dict((k, v["label"]) for k, v in spec_data.VERDICT.items()),
+        "adoption.lifecycle": dict((k, v["label"]) for k, v in spec_data.LIFECYCLE.items()),
+        "adoption.tier": dict((k, v["label"]) for k, v in spec_data.ADOPTION_TIER.items()),
+        "modes": dict(spec_data.MODES),
+        "maintainers": dict((k, o["name"]) for k, o in data["organizations"].items()),
+    }
+    icons = dict((name, icon(name)) for name in (
+        "source-pull", "source-merge", "source-commit", "plus-circle-outline",
+        "delete-outline", "open-in-new"))
+    return {"fields": fields, "values": values, "icons": icons}
+
+
+def render_history(spec, data):
+    """Recent changes to this entry on GitHub, filled in by the page script.
+
+    The list is read from GitHub's API in the visitor's browser rather than at
+    build time, so a pull request shows up here as soon as it is opened, not
+    at the next deploy. Only the frame is rendered here: the heading, a link
+    to the file's full history (which is all a reader gets without JavaScript
+    or when GitHub cannot be reached), and the labels the script needs.
+    """
+    path = spec["source_path"]
+    commits = "https://github.com/%s/commits/%s/%s" % (
+        spec_data.GITHUB_REPO, spec_data.GITHUB_BRANCH, path)
+    o = ['<section class="spec-section hist" id="history" data-history data-repo="%s" '
+         'data-branch="%s" data-path="%s">'
+         % (escape(spec_data.GITHUB_REPO), escape(spec_data.GITHUB_BRANCH), escape(path))]
+    o.append('<h2 class="spec-h2">%s<span>History</span></h2>' % icon("history"))
+    o.append('<div class="hist__body" data-history-body aria-live="polite">'
+             '<p class="hist__note">Changes to this entry are reviewed on GitHub. '
+             '<a href="%s" rel="noopener">See its full history</a>.</p></div>' % escape(commits))
+    o.append('<p class="hist__foot">%s</p>' % ext_link(commits, "Full history on GitHub"))
+    o.append('<script type="application/json" data-history-labels>%s</script>'
+             % json.dumps(history_labels(data), separators=(",", ":")).replace("</", "<\\/"))
+    o.append("</section>")
+    return "".join(o)
 
 
 SCOPE_LABEL = spec_data.LICENCE_SCOPES
