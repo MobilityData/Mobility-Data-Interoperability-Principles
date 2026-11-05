@@ -10,7 +10,7 @@ first_release_year: 2022
 adoption:
   lifecycle: early_adoption
   tier: early
-  confirmed_by_maintainer: partial
+  confirmed_by_maintainer: false
 principles:
   cost_restriction_free:
     verdict: compliant
