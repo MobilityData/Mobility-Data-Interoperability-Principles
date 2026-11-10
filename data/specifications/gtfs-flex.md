@@ -12,8 +12,11 @@ licences:
   scopes: [documentation]
 first_release_year: 2020
 adoption:
-  lifecycle: early_adoption
-  tier: early
+  lifecycle: active
+  tier: hundred_plus
+  adopters_count: 126
+  adopters_count_updated: '2026-11-10'
+  adopters_registry_url: https://mobilitydatabase.org/feeds?features=Booking+Rules%2CFixed-Stops+Demand+Responsive+Transit%2CPredefined+Routes+with+Deviation%2CZone-Based+Demand+Responsive+Services&official=true
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:
@@ -26,11 +29,8 @@ principles:
     evidence_url: https://creativecommons.org/licenses/by/3.0/
   independent_maintainer:
     verdict: compliant
-    rationale: |-
-      Official Maintainer: MobilityData.
-
-      (GitHub repo still held by Google. Google delegated admin rights to MobilityData.)
-    evidence_url: https://gtfs.org/community/governance/gtfs-schedule-governance/roles/
+    rationale: 'Actively maintained by MobilityData, an international non-profit organization. The maintainer facilitates specification development between data producers and data consumers and does not unilaterally decide its content.'
+    evidence_url: https://mobilitydata.org/governance
   structured_releases:
     verdict: compliant
     rationale: Changelog

@@ -14,8 +14,8 @@ first_release_year: 2006
 adoption:
   lifecycle: active
   tier: hundred_plus
-  adopters_count: 2950
-  adopters_count_updated: '2026-09-29'
+  adopters_count: 3010
+  adopters_count_updated: '2026-11-10'
   adopters_registry_url: https://mobilitydatabase.org/feeds?gtfs=true
   confirmed_by_maintainer: true
 principles:
@@ -29,11 +29,8 @@ principles:
     evidence_url: https://creativecommons.org/licenses/by/3.0/
   independent_maintainer:
     verdict: compliant
-    rationale: |-
-      Official Maintainer: MobilityData.
-
-      (GitHub repo still held by Google. Google delegated admin rights to MobilityData.)
-    evidence_url: https://gtfs.org/community/governance/gtfs-schedule-governance/roles/
+    rationale: 'Actively maintained by MobilityData, an international non-profit organization. The maintainer facilitates specification development between data producers and data consumers and does not unilaterally decide its content.'
+    evidence_url: https://mobilitydata.org/governance
   structured_releases:
     verdict: compliant
     rationale: Changelog
