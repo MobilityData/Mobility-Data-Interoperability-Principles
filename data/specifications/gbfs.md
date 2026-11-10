@@ -12,7 +12,7 @@ adoption:
   lifecycle: active
   tier: hundred_plus
   adopters_count: 1536
-  adopters_count_updated: '2026-11-04'
+  adopters_count_updated: '2026-11-10'
   adopters_registry_url: https://mobilitydatabase.org/feeds?gbfs=true
   confirmed_by_maintainer: true
 principles:
@@ -26,8 +26,8 @@ principles:
     evidence_url: https://gbfs.org/documentation/reference/
   independent_maintainer:
     verdict: compliant
-    rationale: 'Yes'
-    evidence_url: https://gbfs.org/documentation/process/
+    rationale: 'Actively maintained by MobilityData, an international non-profit organization. The maintainer facilitates specification development between data producers and data consumers and does not unilaterally decide its content.'
+    evidence_url: https://mobilitydata.org/governance
   structured_releases:
     verdict: compliant
     rationale: 'Yes'

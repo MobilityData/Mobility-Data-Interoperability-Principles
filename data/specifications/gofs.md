@@ -24,8 +24,8 @@ principles:
     evidence_url: https://github.com/MobilityData/GOFS/blob/main/reference.md
   independent_maintainer:
     verdict: compliant
-    rationale: Yes MobilityData is an independent nonprofit; the Maintainer role facilitates but does not vote on changes.
-    evidence_url: https://mobilitydata.org/history/
+    rationale: 'Actively maintained by MobilityData, an international non-profit organization. The maintainer facilitates specification development between data producers and data consumers and does not unilaterally decide its content.'
+    evidence_url: https://mobilitydata.org/governance
   structured_releases:
     verdict: compliant
     rationale: Yes Structured MAJOR/MINOR release cycle with changelog via GitHub releases.
