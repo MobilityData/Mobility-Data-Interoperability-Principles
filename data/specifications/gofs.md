@@ -16,8 +16,8 @@ adoption:
 principles:
   cost_restriction_free:
     verdict: compliant
-    rationale: Yes, Apache 2.0
-    evidence_url: https://github.com/MobilityData/GOFS
+    rationale: GOFS is free to use. Apache 2.0 allows commercial use.
+    evidence_url: https://www.apache.org/licenses/LICENSE-2.0.txt
   publicly_documented:
     verdict: compliant
     rationale: Yes Specification, JSON schema, and governance process are all published in full on GitHub
