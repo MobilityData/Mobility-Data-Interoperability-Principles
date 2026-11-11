@@ -14,36 +14,30 @@ first_release_year: 2011
 adoption:
   lifecycle: active
   tier: hundred_plus
-  adopters_count: 632
-  adopters_count_updated: '2026-09-29'
+  adopters_count: 666
+  adopters_count_updated: '2026-11-10'
   adopters_registry_url: https://mobilitydatabase.org/feeds?gtfs_rt=true
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:
     verdict: compliant
-    rationale: Apache 2.0
-    evidence_url: https://github.com/google/transit?tab=Apache-2.0-1-ov-file
+    rationale: GTFS is free to use. Apache 2.0 allows commercial use.
+    evidence_url: https://www.apache.org/licenses/LICENSE-2.0.txt
   publicly_documented:
     verdict: compliant
-    rationale: CC-BY-3.0
-    evidence_url: https://creativecommons.org/licenses/by/3.0/
+    rationale: The full documentation is available publicly.
+    evidence_url: https://gtfs.org/documentation/overview
   independent_maintainer:
     verdict: compliant
-    rationale: |-
-      Defacto Steward: MobilityData.
-
-      (GitHub repo still held by Google. Google delegated admin rights to MobilityData.)
-    evidence_url: https://gtfs.org/community/governance/gtfs-realtime-amendment-process/
+    rationale: 'Actively maintained by MobilityData, an international non-profit organization. The maintainer facilitates specification development between data producers and data consumers and does not unilaterally decide its content.'
+    evidence_url: https://mobilitydata.org/governance
   structured_releases:
     verdict: compliant
-    rationale: Changelog
+    rationale: Change history available
     evidence_url: https://gtfs.org/documentation/realtime/change-history/revision-history/
   open_governance:
     verdict: compliant
-    rationale: |-
-      Anyone can vote with equal rights.
-
-      Note: Interface between governance and actual protobuf file implementation
+    rationale: Anyone can become a Contributor by participating in discussions within the official GTFS repository, regardless of their technical skills or experience with GTFS. Everyone can vote with equal rights.
     evidence_url: https://gtfs.org/community/governance/gtfs-realtime-amendment-process/
 ---
 

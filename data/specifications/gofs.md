@@ -16,16 +16,16 @@ adoption:
 principles:
   cost_restriction_free:
     verdict: compliant
-    rationale: Yes, Apache 2.0
-    evidence_url: https://github.com/MobilityData/GOFS
+    rationale: GOFS is free to use. Apache 2.0 allows commercial use.
+    evidence_url: https://www.apache.org/licenses/LICENSE-2.0.txt
   publicly_documented:
     verdict: compliant
     rationale: Yes Specification, JSON schema, and governance process are all published in full on GitHub
     evidence_url: https://github.com/MobilityData/GOFS/blob/main/reference.md
   independent_maintainer:
     verdict: compliant
-    rationale: Yes MobilityData is an independent nonprofit; the Maintainer role facilitates but does not vote on changes.
-    evidence_url: https://mobilitydata.org/history/
+    rationale: 'Actively maintained by MobilityData, an international non-profit organization. The maintainer facilitates specification development between data producers and data consumers and does not unilaterally decide its content.'
+    evidence_url: https://mobilitydata.org/governance
   structured_releases:
     verdict: compliant
     rationale: Yes Structured MAJOR/MINOR release cycle with changelog via GitHub releases.
