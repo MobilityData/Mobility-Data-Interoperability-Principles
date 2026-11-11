@@ -12,8 +12,12 @@ licences:
   scopes: [documentation]
 first_release_year: 2022
 adoption:
+  adopters_count: 8
+  adopters_count_updated: '2026-11-11'
+  adopters_registry_url: https://tods-transit.org/
   lifecycle: early_adoption
   tier: early
+  confirmed_by_maintainer: true
 principles:
   cost_restriction_free:
     verdict: compliant
