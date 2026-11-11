@@ -14,6 +14,9 @@ first_release_year: 2020
 adoption:
   lifecycle: early_adoption
   tier: early
+  adopters_count: 150
+  adopters_count_updated: '2026-11-04'
+  adopters_registry_url: https://mobilitydatabase.org/feeds?features=Booking+Rules%2CContinuous+Stops%2CFixed-Stops+Demand+Responsive+Transit%2CPredefined+Routes+with+Deviation%2CZone-Based+Demand+Responsive+Services
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:
@@ -27,6 +30,7 @@ principles:
   independent_maintainer:
     verdict: compliant
     rationale: |-
+      International non profit organization.
       Official Maintainer: MobilityData.
 
       (GitHub repo still held by Google. Google delegated admin rights to MobilityData.)
