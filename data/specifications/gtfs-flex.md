@@ -21,23 +21,23 @@ adoption:
 principles:
   cost_restriction_free:
     verdict: compliant
-    rationale: Apache 2.0
-    evidence_url: https://github.com/google/transit?tab=Apache-2.0-1-ov-file
+    rationale: GTFS Flex is free to use. Apache 2.0 allows commercial use.
+    evidence_url: https://www.apache.org/licenses/LICENSE-2.0.txt
   publicly_documented:
     verdict: compliant
-    rationale: Apache 2.0
-    evidence_url: https://creativecommons.org/licenses/by/3.0/
+    rationale: The full documentation is available publicly.
+    evidence_url: https://gtfs.org/getting-started/features/flexible-services
   independent_maintainer:
     verdict: compliant
     rationale: 'Actively maintained by MobilityData, an international non-profit organization. The maintainer facilitates specification development between data producers and data consumers and does not unilaterally decide its content.'
     evidence_url: https://mobilitydata.org/governance
   structured_releases:
     verdict: compliant
-    rationale: Changelog
+    rationale: Change history available
     evidence_url: https://gtfs.org/documentation/schedule/change-history/revision-history/
   open_governance:
     verdict: compliant
-    rationale: Anyone can vote with equal rights.
+    rationale: Anyone can become a Contributor by participating in discussions within the official GTFS repository, regardless of their technical skills or experience with GTFS. Everyone can vote with equal rights.
     evidence_url: https://gtfs.org/community/governance/gtfs-schedule-governance/roles/
 ---
 
