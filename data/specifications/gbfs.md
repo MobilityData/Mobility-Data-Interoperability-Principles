@@ -18,11 +18,11 @@ adoption:
 principles:
   cost_restriction_free:
     verdict: compliant
-    rationale: 'Yes'
-    evidence_url: https://gbfs.org/documentation/faq/
+    rationale: 'CC BY 3.0: "You are free to share, copy and redistribute the material in any medium or format for any purpose, even commercially"'
+    evidence_url: https://creativecommons.org/licenses/by/3.0
   publicly_documented:
     verdict: compliant
-    rationale: 'Yes'
+    rationale: 'The full documentation is available publicly'
     evidence_url: https://gbfs.org/documentation/reference/
   independent_maintainer:
     verdict: compliant
@@ -34,7 +34,7 @@ principles:
     evidence_url: https://github.com/MobilityData/gbfs/releases
   open_governance:
     verdict: compliant
-    rationale: 'Yes'
+    rationale: 'GBFS is developed and maintained by the community of producers and consumers of GBFS data. Anyone can propose a change and vote.'
     evidence_url: https://gbfs.org/documentation/process/
 ---
 
