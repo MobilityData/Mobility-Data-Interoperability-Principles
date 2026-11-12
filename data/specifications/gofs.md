@@ -1,7 +1,7 @@
 ---
 short_name: GOFS
 full_name: General On-Demand Feed Specification (GOFS)
-homepage_url: https://github.com/MobilityData/GOFS/blob/main/governance.md
+homepage_url: https://gofs.org/
 status: compliant
 modes: [microtransit_drt, taxi_ridehail]
 maintainers: [mobilitydata]
@@ -13,6 +13,9 @@ adoption:
   lifecycle: early_adoption
   tier: early
   confirmed_by_maintainer: true
+  adopters_count: 3
+  adopters_count_updated: '2026-11-12'
+  adopters_registry_url: https://github.com/MobilityData/GOFS/blob/main/systems.csv
 principles:
   cost_restriction_free:
     verdict: compliant
@@ -38,4 +41,4 @@ principles:
 
 # Description
 
-A lightweight, open data format for purely on-demand transport services (no fixed routes/schedule) to describe their offering for consumption by transport applications
+A lightweight, open data format for purely on-demand transport services (no fixed routes/schedule) to describe their offering for consumption by trip planning applications.
