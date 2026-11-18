@@ -1,7 +1,7 @@
 """The registry's read-only JSON API, written as static files at build time.
 
 `build_api` takes the joined dataset from spec_data.build_dataset() and
-returns {published path: text}. The MkDocs hook publishes those files under
+returns {published path: text}. The ProperDocs hook publishes those files under
 /api/, and `make specs-export` writes the same files to a local folder.
 
     api/index.json                   what is here, and the vocabularies

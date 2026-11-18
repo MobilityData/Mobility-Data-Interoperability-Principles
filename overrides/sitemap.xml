@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-{#- MkDocs' own sitemap template, plus one rule: pages whose front matter sets
+{#- ProperDocs' own sitemap template, plus one rule: pages whose front matter sets
     `robots: noindex` are left out, so an unlisted page is not advertised to
     search engines here either. -#}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
