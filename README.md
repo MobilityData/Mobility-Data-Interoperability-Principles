@@ -36,8 +36,10 @@ The `/specifications` page, one page per specification under
 `/specifications/<id>/`, and a read-only JSON API under `/api/` are generated
 at build time from the files in [`data/`](data/README.md). GitHub is the
 source of truth and the place to contribute: each specification and each
-organization is one Markdown file with YAML front matter, and "Suggest a
-change" on a specification's page opens that file in GitHub's editor.
+organization is one Markdown file with YAML front matter. "Suggest a change"
+on a specification's page edits the page in place and sends the change as a
+pre-filled GitHub issue; `/specifications/new/` does the same for a new
+specification.
 
 | Path | What it is |
 | --- | --- |
@@ -50,6 +52,7 @@ change" on a specification's page opens that file in GitHub's editor.
 | `scripts/spec_api.py` | Builds the `/api/` files: catalogue, full records, export CSV, the OpenAPI description, and its Swagger UI page at `/api/docs/`. |
 | `scripts/check_specs.py` | `make specs-check`: validation, also run on every pull request. |
 | `hooks/specifications.py` | MkDocs hook that renders the pages and publishes the API. |
+| `overrides/assets/javascript/spec-editor.js` | The in-page editor behind "Suggest a change" and `/specifications/new/`. |
 
 ```bash
 make specs-check    # validate the data; fails on any unknown value or key

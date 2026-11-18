@@ -64,11 +64,13 @@ extra_javascript:
   - https://unpkg.com/mermaid@8.5.0/dist/mermaid.min.js
   - assets/javascript/fix-md-search.js
   - assets/javascript/specifications.js
+  - assets/javascript/spec-editor.js
 
 extra_css:
   - https://use.fontawesome.com/releases/v5.13.0/css/all.css
   - assets/stylesheets/additional.css
   - assets/stylesheets/specifications.css
+  - assets/stylesheets/spec-editor.css
 
 markdown_extensions:
   - attr_list

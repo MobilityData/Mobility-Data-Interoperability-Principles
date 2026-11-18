@@ -1,0 +1,537 @@
+/* ==========================================================================
+   MDIP SPECIFICATION REGISTRY - in-page editor (spec-editor.js)
+
+   Uses the tokens declared on .mdip-spec in specifications.css, so it follows
+   Material's light and slate schemes with no colours of its own. A changed
+   value is marked with a soft wash behind it, never with a coloured edge.
+   ========================================================================== */
+
+.mdip-spec { position: relative; }
+
+/* -- edit buttons ---------------------------------------------------------- */
+
+.mdip-spec .sed-pen { display: none; }
+
+.mdip-spec.is-editing .sed-pen {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  margin-left: .35rem;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--brand);
+  font-size: .75rem;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: pointer;
+  box-shadow: var(--sh-1);
+  transition: background-color .15s var(--ease), border-color .15s var(--ease),
+              transform .15s var(--ease);
+}
+.mdip-spec.is-editing .sed-pen .mdip-i { width: .8rem; height: .8rem; }
+.mdip-spec.is-editing .sed-pen:hover { background: var(--info-bg); border-color: var(--brand); transform: scale(1.06); }
+[data-md-color-scheme="slate"] .mdip-spec.is-editing .sed-pen { color: var(--info); }
+
+/* Values drawn as a block (the description, licence and maintainer cards)
+   carry their button on the top corner instead of after the last line. */
+.mdip-spec.is-editing .sed-block { position: relative; }
+.mdip-spec.is-editing .sed-block > .sed-pen {
+  position: absolute;
+  top: -.7rem;
+  right: -.5rem;
+  z-index: 2;
+  margin: 0;
+}
+
+.mdip-spec .sed-empty { display: none; }
+.mdip-spec.is-editing .sed-empty {
+  display: inline;
+  color: var(--ink-3);
+  font-size: .68rem;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* An empty field reads as a field to fill in, and opens its editor. */
+.mdip-spec.is-editing [data-edit] .sed-empty {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: .15em .7em;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: .68rem;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: border-color .15s var(--ease), color .15s var(--ease);
+}
+.mdip-spec.is-editing [data-edit] .sed-empty:hover { border-color: var(--brand); color: var(--ink); }
+.mdip-spec.is-editing h1 [data-edit] .sed-empty { min-height: 2.4rem; padding: .2em .9em; font-size: 1.1rem; }
+.mdip-spec.is-editing .sed-block > .sed-empty,
+.mdip-spec.is-editing .spec-hero__lede .sed-empty { display: flex; min-height: 3rem; }
+
+/* -- what changed ---------------------------------------------------------- */
+
+.mdip-spec.is-editing .is-changed {
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--brand) 9%, transparent);
+  box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--brand) 9%, transparent);
+}
+[data-md-color-scheme="slate"] .mdip-spec.is-editing .is-changed {
+  background: color-mix(in srgb, var(--info) 14%, transparent);
+  box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--info) 14%, transparent);
+}
+
+.mdip-spec .sed-flash { animation: sed-flash 1.2s var(--ease); }
+@keyframes sed-flash {
+  0%, 30% { background: color-mix(in srgb, var(--brand) 26%, transparent); }
+}
+
+/* -- criteria while editing ------------------------------------------------ */
+
+.mdip-spec.is-editing .crit__body,
+.mdip-spec.is-editing .crit__src,
+.mdip-spec.is-editing .crit__chev { display: none; }
+.mdip-spec.is-editing details.crit > .crit__head { cursor: default; }
+.mdip-spec.is-editing details.crit > .crit__head:hover { background: none; }
+
+.mdip-spec .crit__edit {
+  display: grid;
+  gap: .5rem;
+  margin: 0;
+  padding: .55rem .8rem .7rem 2.35rem;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.mdip-spec .crit__edit[hidden] { display: none; }
+.mdip-spec .crit__edit > div { display: grid; gap: .15rem; }
+@media (min-width: 42em) {
+  .mdip-spec .crit__edit > div { grid-template-columns: 5.5rem minmax(0, 1fr); align-items: baseline; }
+}
+.mdip-spec .crit__edit dt {
+  color: var(--ink-3);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.mdip-spec .crit__edit dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .3rem;
+  margin: 0;
+}
+.mdip-spec .crit__edit .crit__rationale { margin: 0; }
+
+/* -- popover --------------------------------------------------------------- */
+
+.mdip-spec .sed-pop {
+  position: absolute;
+  z-index: 30;
+  width: 19rem;
+  max-width: calc(100% - 24px);
+  padding: .65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--sh-3);
+  animation: sed-in .18s var(--ease);
+}
+.mdip-spec .sed-pop--wide { width: 25rem; }
+@keyframes sed-in {
+  from { opacity: 0; transform: translateY(-4px) scale(.98); }
+}
+
+.mdip-spec .sed-pop--sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  width: auto;
+  max-width: none;
+  max-height: 82vh;
+  overflow-y: auto;
+  padding: .9rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  border-radius: var(--r-l) var(--r-l) 0 0;
+  animation: sed-up .24s var(--ease);
+}
+@keyframes sed-up { from { transform: translateY(30%); opacity: 0; } }
+
+.mdip-spec .sed-pop__head {
+  margin: .05rem .2rem .5rem;
+  color: var(--ink-3);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.mdip-spec .sed-pop__foot {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .65rem;
+}
+.mdip-spec .sed-pop__foot .btn { padding: .42em .85em; }
+
+/* -- custom list (the drop-down) ------------------------------------------- */
+
+.mdip-spec .sed-list {
+  max-height: 19rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  outline: none;
+  overscroll-behavior: contain;
+}
+.mdip-spec .sed-list:focus-visible { outline: none; }
+
+.mdip-spec .sed-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin: 0;
+  padding: .42rem .5rem;
+  border-radius: var(--r-s);
+  cursor: pointer;
+}
+.mdip-spec .sed-opt.is-active { background: var(--surface-2); }
+.mdip-spec .sed-list:focus .sed-opt.is-active,
+.mdip-spec .sed-list--pick .sed-opt.is-active { background: var(--muted-bg); }
+.mdip-spec .sed-opt__v {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .1rem .45rem;
+  min-width: 0;
+}
+.mdip-spec .sed-opt__t { color: var(--ink); font-size: .7rem; font-weight: 600; }
+.mdip-spec .sed-opt__t .mdip-i { width: .9em; height: .9em; vertical-align: -.1em; }
+.mdip-spec .sed-opt__t--muted { color: var(--ink-3); font-weight: 500; }
+.mdip-spec .sed-opt__h { flex-basis: 100%; color: var(--ink-3); font-size: .6rem; line-height: 1.4; }
+.mdip-spec .sed-opt__ck { flex: none; display: inline-flex; width: 1rem; color: var(--brand); }
+.mdip-spec .sed-opt .org-logo { width: 1.25rem; height: 1.25rem; }
+.mdip-spec .sed-opt .org-logo--mono { font-size: .48rem; }
+
+.mdip-spec .sed-group {
+  margin: .35rem .5rem .15rem;
+  color: var(--ink-3);
+  font-size: .55rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.mdip-spec .sed-dot {
+  flex: none;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.mdip-spec .sed-dot--open { background: var(--pass); }
+.mdip-spec .sed-dot--restricted { background: var(--warn); }
+.mdip-spec .sed-dot--closed { background: var(--fail); }
+
+/* -- inputs ---------------------------------------------------------------- */
+
+.mdip-spec .sed-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: .45rem .55rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: .72rem;
+  line-height: 1.5;
+  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+.mdip-spec textarea.sed-input { resize: vertical; min-height: 4.5rem; }
+.mdip-spec .sed-input:focus {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 15%, transparent);
+}
+.mdip-spec .sed-input[aria-invalid="true"] { border-color: var(--fail); }
+.mdip-spec .sed-err { margin: .3rem .1rem 0; color: var(--fail); font-size: .62rem; }
+
+.mdip-spec .sed-find {
+  display: flex;
+  align-items: center;
+  gap: .4em;
+  margin-bottom: .3rem;
+  padding: .35em .6em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--ink-3);
+}
+.mdip-spec .sed-find:focus-within { border-color: var(--brand); }
+.mdip-spec .sed-find input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: .68rem;
+  outline: none;
+}
+
+/* -- toggle chips (modes, licence scopes) ---------------------------------- */
+
+.mdip-spec .sed-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+.mdip-spec .sed-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .25em;
+  padding: .36em .75em;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: .66rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color .15s var(--ease), color .15s var(--ease), border-color .15s var(--ease);
+}
+.mdip-spec .sed-chip:hover { border-color: var(--brand); }
+.mdip-spec .sed-chip__ck { display: inline-flex; width: 0; overflow: hidden; transition: width .15s var(--ease); }
+.mdip-spec .sed-chip__ck .mdip-i { width: .9em; height: .9em; }
+.mdip-spec .sed-chip[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--info-bg);
+  color: var(--brand);
+  font-weight: 600;
+}
+[data-md-color-scheme="slate"] .mdip-spec .sed-chip[aria-pressed="true"] { color: var(--info); }
+.mdip-spec .sed-chip[aria-pressed="true"] .sed-chip__ck { width: 1em; }
+.mdip-spec .sed-chips--sm { margin-top: .4rem; gap: .25rem; }
+.mdip-spec .sed-chips--sm .sed-chip { padding: .22em .6em; font-size: .6rem; }
+
+/* -- licences -------------------------------------------------------------- */
+
+.mdip-spec .sed-lics { display: grid; gap: .45rem; }
+.mdip-spec .sed-lic { padding: .45rem; border-radius: var(--r-s); background: var(--surface-2); }
+.mdip-spec .sed-lic__top { display: flex; align-items: center; gap: .3rem; }
+.mdip-spec .sed-combo {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: .45rem;
+  min-width: 0;
+  padding: .38rem .5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mdip-spec .sed-combo:hover,
+.mdip-spec .sed-combo[aria-expanded="true"] { border-color: var(--brand); }
+.mdip-spec .sed-combo__t { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.mdip-spec .sed-combo__t > span { font-size: .7rem; font-weight: 600; }
+.mdip-spec .sed-combo__t small {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: .58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mdip-spec .sed-combo > .mdip-i { flex: none; width: .9rem; height: .9rem; color: var(--ink-3); }
+.mdip-spec .sed-combo[aria-expanded="true"] > .mdip-i { transform: rotate(180deg); }
+
+.mdip-spec .sed-pick {
+  margin-top: .35rem;
+  padding: .35rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+}
+.mdip-spec .sed-list--pick { max-height: 12.5rem; }
+.mdip-spec .sed-other { display: grid; gap: .3rem; margin-top: .35rem; }
+.mdip-spec .sed-add { margin-top: .45rem; }
+
+.mdip-spec .sed-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-s);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.mdip-spec .sed-icon:hover { background: var(--fail-bg); color: var(--fail); }
+.mdip-spec .sed-icon .mdip-i { width: .95rem; height: .95rem; }
+.mdip-spec .sed-icon--sm { width: 1.15rem; height: 1.15rem; border-radius: 999px; }
+.mdip-spec .sed-icon--sm .mdip-i { width: .7rem; height: .7rem; }
+
+/* -- maintainers ----------------------------------------------------------- */
+
+.mdip-spec .sed-picked { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .45rem; }
+.mdip-spec .sed-picked:empty { display: none; }
+.mdip-spec .sed-picked__c {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .18rem .2rem .18rem .25rem;
+  border-radius: 999px;
+  background: var(--muted-bg);
+  color: var(--ink);
+  font-size: .64rem;
+  font-weight: 500;
+}
+.mdip-spec .sed-picked__c .org-logo { width: 1.1rem; height: 1.1rem; }
+.mdip-spec .sed-picked__c .org-logo--mono { font-size: .42rem; }
+
+/* -- the bar while editing ------------------------------------------------- */
+
+.mdip-spec .sed-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  z-index: 20;
+  width: min(36rem, calc(100% - 2rem));
+  transform: translateX(-50%);
+  animation: sed-bar-in .3s var(--ease);
+}
+@keyframes sed-bar-in { from { opacity: 0; transform: translate(-50%, 1rem); } }
+.mdip-spec .sed-bar__in {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .45rem .45rem .45rem .95rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--sh-3);
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+}
+.mdip-spec .sed-bar__t {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: .4rem;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: .68rem;
+  white-space: nowrap;
+}
+.mdip-spec .sed-bar__t > span { overflow: hidden; text-overflow: ellipsis; }
+.mdip-spec .sed-bar__t .mdip-i { flex: none; color: var(--brand); }
+.mdip-spec .sed-bar__n {
+  color: var(--ink-3);
+  font-size: .62rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mdip-spec .sed-bar .btn:disabled { opacity: .45; cursor: default; transform: none; box-shadow: none; }
+@media (max-width: 40em) {
+  .mdip-spec .sed-bar { bottom: .6rem; }
+  .mdip-spec .sed-bar__in { border-radius: var(--r-m); padding-left: .7rem; }
+  .mdip-spec .sed-bar__n { display: none; }
+}
+body.sed-has-bar .mdip-spec { padding-bottom: 4.5rem; }
+
+/* -- unsent suggestion ----------------------------------------------------- */
+
+.mdip-spec .sed-draft {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem .7rem;
+  margin: 0;
+  padding: .65rem .8rem;
+  border-radius: var(--r-m);
+  background: var(--info-bg);
+  color: var(--ink-2);
+  font-size: .68rem;
+}
+.mdip-spec .sed-draft > span { flex: 1 1 12rem; }
+.mdip-spec .sed-draft > .mdip-i { flex: none; color: var(--brand); }
+
+/* -- review dialog --------------------------------------------------------- */
+
+.mdip-spec .sed-dialog {
+  width: min(40rem, calc(100% - 2rem));
+  max-height: calc(100vh - 3rem);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-l);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--sh-3);
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.mdip-spec .sed-dialog[open] { animation: sed-in .2s var(--ease); }
+.mdip-spec .sed-dialog::backdrop {
+  background: rgba(16, 25, 43, .45);
+  backdrop-filter: blur(3px);
+}
+.mdip-spec .sed-dialog__in { padding: 1.2rem 1.3rem 1.1rem; }
+.mdip-spec .sed-dialog h2 {
+  margin: 0 0 .8rem;
+  color: var(--ink);
+  font-family: "Raleway", system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.mdip-spec .sed-dialog p { margin: 0; color: var(--ink-2); font-size: .7rem; line-height: 1.55; }
+.mdip-spec .sed-dialog .hist__scroll { margin-top: 0; max-height: 40vh; overflow: auto; }
+.mdip-spec .sed-label {
+  display: block;
+  margin: .9rem 0 .3rem;
+  color: var(--ink-2);
+  font-size: .64rem;
+  font-weight: 600;
+}
+.mdip-spec .sed-gh {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  margin-top: .9rem;
+  padding: .6rem .75rem;
+  border-radius: var(--r-s);
+  background: var(--surface-2);
+}
+.mdip-spec .sed-gh > .mdip-i { flex: none; width: 1.1rem; height: 1.1rem; color: var(--ink-2); }
+.mdip-spec .sed-dialog .sed-gh p { font-size: .64rem; }
+.mdip-spec .sed-paste { display: flex; gap: .4rem; margin-top: .7rem !important; }
+.mdip-spec .sed-paste[hidden] { display: none; }
+.mdip-spec .sed-dialog__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: .45rem;
+  margin-top: 1.1rem;
+}
+.mdip-spec .sed-dialog .btn .mdip-i:last-child:not(:first-child) { width: .8em; height: .8em; opacity: .7; }

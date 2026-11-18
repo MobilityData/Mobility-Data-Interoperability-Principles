@@ -15,13 +15,19 @@ folder on every build.
 
 ## How to contribute
 
-- **Change an entry**: on the specification's page, "Suggest a change" opens
-  its file in GitHub's editor. Without write access to the repository, GitHub
-  offers to fork it and open a pull request, which is where the change is
-  reviewed.
-- **Add a specification**: "Propose a specification" on the registry page
-  opens a new file with every field laid out. Name the file after the
-  specification's id.
+- **Change an entry**: on the specification's page, "Suggest a change" makes
+  the page editable. Each value gets an edit button with a control that only
+  offers valid values, and values that depend on each other follow along (a
+  criterion that is not compliant makes the status not compliant, for
+  example). The change is sent as a pre-filled issue
+  ([`specification-edit.yml`](../.github/ISSUE_TEMPLATE/specification-edit.yml))
+  showing what changes and the same change as YAML for the file. It is kept
+  in the browser until it is sent, so signing in or creating a GitHub account
+  does not lose it. Without JavaScript, the button opens the file in GitHub's
+  editor instead.
+- **Add a specification**: "Propose a specification" opens
+  `/specifications/new/`, a blank page in the same editor. It sends the whole
+  new file, named after the registry id, as an issue.
 - **Report a problem or ask a question**: open a
   [change request](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles/issues/new?template=specification-change.yml).
 

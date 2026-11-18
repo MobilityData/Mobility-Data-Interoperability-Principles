@@ -1,0 +1,32 @@
+name: Suggested change from a specification page
+description: Filled in by "Suggest a change" on a specification's page in the MDIP registry (/specifications).
+title: "Suggested change: "
+labels: ["specification-registry", "suggested-change"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is filled in by the registry page. Submit it as it is: the
+        coalition reviews the change here in public, then applies it to the
+        specification's file in [`data/specifications/`](https://github.com/MobilityData/Mobility-Data-Interoperability-Principles/tree/main/data/specifications).
+  - type: input
+    id: spec_id
+    attributes:
+      label: Specification id
+      description: The file name in `data/specifications/`, without `.md`.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed change
+      description: What the page shows today, what it should show, and the same change as it would be written in the file.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sources
+      description: Links that support the change, such as a licence file, governance charter, changelog or adopters list.
+    validations:
+      required: false
