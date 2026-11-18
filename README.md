@@ -51,7 +51,7 @@ specification.
 | `scripts/spec_data.py` | Loads, validates and joins the files. |
 | `scripts/spec_api.py` | Builds the `/api/` files: catalogue, full records, export CSV, the OpenAPI description, and its Swagger UI page at `/api/docs/`. |
 | `scripts/check_specs.py` | `make specs-check`: validation, also run on every pull request. |
-| `hooks/specifications.py` | MkDocs hook that renders the pages and publishes the API. |
+| `hooks/specifications.py` | ProperDocs hook that renders the pages and publishes the API. |
 | `overrides/assets/javascript/spec-editor.js` | The in-page editor behind "Suggest a change" and `/specifications/new/`. |
 
 ```bash

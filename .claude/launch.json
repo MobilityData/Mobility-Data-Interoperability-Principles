@@ -2,14 +2,14 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "mkdocs-en",
-      "runtimeExecutable": "mkdocs",
+      "name": "properdocs-en",
+      "runtimeExecutable": "properdocs",
       "runtimeArgs": ["serve", "-f", "config/en/properdocs.yml", "--dev-addr", "127.0.0.1:8000", "--watch", "overrides", "--watch", "hooks", "--watch", "data", "--watch", "scripts"],
       "port": 8000
     },
     {
-      "name": "mkdocs-en-alt",
-      "runtimeExecutable": "mkdocs",
+      "name": "properdocs-en-alt",
+      "runtimeExecutable": "properdocs",
       "runtimeArgs": ["serve", "-f", "config/en/properdocs.yml", "--dev-addr", "127.0.0.1:8001"],
       "port": 8001
     }

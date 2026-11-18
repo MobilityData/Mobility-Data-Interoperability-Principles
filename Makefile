@@ -11,8 +11,8 @@ setup:
 	pip3 install --upgrade --force-reinstall properdocs && \
 	pip3 install --upgrade --force-reinstall mkdocs-material
 
-# --watch: mkdocs only watches docs/ and the config by itself, so the
-# specification registry's sources (hooks/, scripts/, data/) have to be named. Note that mkdocs caches
+# --watch: ProperDocs only watches docs/ and the config by itself, so the
+# specification registry's sources (hooks/, scripts/, data/) have to be named. Note that ProperDocs caches
 # the hook module -- an edit to hooks/ or scripts/ triggers a rebuild but the
 # old code runs, so restart the server after changing those.
 serve: clean
