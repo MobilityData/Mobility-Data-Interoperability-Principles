@@ -421,6 +421,62 @@
 
     readState();
     apply(false);
+    initPanelScroll(root, panel);
+  }
+
+  /*
+   * The filter panel on a wide screen: sticky, with no scrollbar of its own.
+   *
+   * A sticky element taller than the window would hide its last filters, so
+   * its `top` follows the scroll instead of staying fixed. Scrolling down,
+   * `top` decreases by as much as the page moved, so the panel travels with
+   * the page until its bottom edge is in view, and then stays there.
+   * Scrolling up, `top` increases the same way, so the panel comes back with
+   * the page at once rather than waiting for the top of the list, until it
+   * sits under the header again. A panel shorter than the window simply
+   * sticks under the header. The drawer used on narrow screens keeps its
+   * own scroll and is not touched.
+   */
+  function initPanelScroll(root, panel) {
+    var wide = window.matchMedia("(min-width: 60em)");
+    var GAP = 16;
+    var top = null;
+    var lastY = window.pageYOffset;
+
+    function bounds() {
+      var hdr = parseFloat(getComputedStyle(root).getPropertyValue("--hdr")) || 0;
+      if (/rem$/.test(getComputedStyle(root).getPropertyValue("--hdr").trim())) {
+        hdr *= parseFloat(getComputedStyle(document.documentElement).fontSize);
+      }
+      var max = hdr + GAP;
+      var min = Math.min(max, window.innerHeight - panel.offsetHeight - GAP);
+      return [min, max];
+    }
+
+    function update() {
+      if (!wide.matches) {
+        root.style.removeProperty("--panel-top");
+        top = null;
+        lastY = window.pageYOffset;
+        return;
+      }
+      var b = bounds();
+      var y = window.pageYOffset;
+      if (top === null) { top = b[1]; }
+      top = Math.max(b[0], Math.min(b[1], top - (y - lastY)));
+      lastY = y;
+      root.style.setProperty("--panel-top", top + "px");
+    }
+
+    /* Set straight from the scroll event, not a later frame, so the panel
+       and the page move together. */
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    if ("ResizeObserver" in window) {
+      /* Opening or closing a filter changes the panel's height. */
+      new ResizeObserver(update).observe(panel);
+    }
+    update();
   }
 
   /* ----------------------------------------------------------------- detail */
@@ -464,11 +520,14 @@
    * API in the browser so that an open pull request shows up as soon as it
    * exists, without waiting for the site to be rebuilt.
    *
-   * Two lists: pull requests still open on this entry's file ("Review in
-   * progress"), then the last MAX_CHANGES changes merged into the branch the
-   * site is built from. What a change did is worked out by reading the file
-   * before and after it (raw.githubusercontent.com, which has no rate limit)
-   * and comparing the two field by field.
+   * Two lists: what is proposed and not merged yet (pull requests open on
+   * this entry's file, and changes suggested from the page's editor, which
+   * arrive as issues), then the last MAX_CHANGES changes merged into the
+   * branch the site is built from. What a change did is worked out by
+   * reading the file before and after it (raw.githubusercontent.com, which
+   * has no rate limit) and comparing the two field by field. Each change
+   * names who proposed it, who took part in the discussion, and who approved
+   * or merged it, read from the conversation's timeline.
    *
    * Without a token GitHub allows 60 API calls an hour per visitor, so every
    * answer is kept in sessionStorage for a few minutes and shared between
@@ -480,6 +539,8 @@
   var MAX_ROWS = 6;
   var EXCERPT = 180;
   var CACHE_MS = 10 * 60 * 1000;
+  /* A merged change's conversation is over: its people are kept longer. */
+  var DAY_MS = 24 * 60 * 60 * 1000;
 
   function initHistory() {
     var root = document.querySelector("[data-history]");
@@ -496,27 +557,40 @@
 
     body.innerHTML = '<p class="hist__note">Loading changes from GitHub...</p>';
 
-    Promise.all([loadYaml(), openProposals(api, path), mergedChanges(api, repo, branch, path)])
+    var specId = path.replace(/^.*\//, "").replace(/\.md$/, "");
+
+    Promise.all([loadYaml(), openProposals(api, path), mergedChanges(api, repo, branch, path),
+      suggestions(api, specId)])
       .then(function (res) {
         var open = res[1];
         var merged = res[2];
+        var suggested = res[3];
         return Promise.all([
           Promise.all(open.map(function (pr) {
-            return diffOf(
-              raw(repo, pr.base, path),
-              raw(pr.headRepo || repo, pr.head, path)
-            ).then(function (d) { pr.diff = d; return pr; });
+            return Promise.all([
+              diffOf(raw(repo, pr.base, path), raw(pr.headRepo || repo, pr.head, path)),
+              participants(api, pr.number, pr.head)
+            ]).then(function (r) { pr.diff = r[0]; pr.people = r[1]; return pr; });
           })),
           Promise.all(merged.map(function (ch) {
-            return diffOf(
-              ch.parent ? raw(repo, ch.parent, path) : Promise.resolve(null),
-              raw(repo, ch.sha, path)
-            ).then(function (d) { ch.diff = d; return ch; });
+            return Promise.all([
+              diffOf(
+                ch.parent ? raw(repo, ch.parent, path) : Promise.resolve(null),
+                raw(repo, ch.sha, path)
+              ),
+              ch.pr ? participants(api, ch.pr, "merged", DAY_MS) : null
+            ]).then(function (r) { ch.diff = r[0]; ch.people = r[1]; return ch; });
+          })),
+          Promise.all(suggested.map(function (is) {
+            return Promise.all([
+              suggestionDiff(raw(repo, branch, path), is.body),
+              participants(api, is.number, is.updated)
+            ]).then(function (r) { is.diff = r[0]; is.people = r[1]; return is; });
           }))
         ]);
       })
       .then(function (lists) {
-        body.innerHTML = render(lists[0], lists[1]);
+        body.innerHTML = render(lists[2].concat(lists[0]), lists[1]);
       })
       .catch(function () {
         body.innerHTML = '<p class="hist__note">Recent changes could not be loaded from GitHub ' +
@@ -534,10 +608,11 @@
         h += '<h3 class="hist__group">Proposed changes</h3><ol class="hist__list">' +
           open.map(function (pr) {
             return item({
-              tone: "info", ico: "source-pull", status: "Review in progress",
+              tone: "info", ico: pr.issue ? "lightbulb-on-outline" : "source-pull",
+              status: pr.issue ? "Suggested change" : "Review in progress",
               title: pr.title, number: pr.number, url: pr.url, date: pr.created,
-              people: [["Change proposed by", pr.user]],
-              text: pr.body, diff: pr.diff, after: "Proposed", folded: false
+              people: people(pr, null),
+              text: pr.issue ? "" : pr.body, diff: pr.diff, after: "Proposed", folded: false
             });
           }).join("") + "</ol>";
       }
@@ -550,9 +625,7 @@
               ico: added ? "plus-circle-outline" : ch.pr ? "source-merge" : "source-commit",
               status: added ? "Added to the registry" : ch.pr ? "Merged" : "Committed",
               title: ch.title, number: ch.pr, url: ch.url, date: ch.date,
-              people: ch.pr
-                ? [["Change proposed by", ch.user], ["Change merged by", ch.mergedBy]]
-                : [["Changed by", ch.user]],
+              people: ch.pr ? people(ch, ch.mergedBy) : [["Changed by", [ch.user]]],
               text: ch.body, diff: added ? null : ch.diff, after: "After", folded: true
             });
           }).join("") + "</ol>";
@@ -572,11 +645,12 @@
       h += '<a class="hist__title" href="' + esc(it.url) + '" rel="noopener">' +
         "<span>" + esc(it.title) + "</span>" +
         (it.number ? '<span class="hist__num">#' + it.number + "</span>" : "") + "</a>";
-      var people = it.people.filter(function (p) { return p[1]; });
-      if (people.length) {
-        h += '<p class="hist__by">' + people.map(function (p) {
-          return "<span>" + esc(p[0]) + ' <a href="' + esc(p[1].url) + '" rel="noopener">@' +
-            esc(p[1].login) + "</a></span>";
+      var who = it.people.map(function (p) {
+        return [p[0], (p[1] || []).filter(Boolean)];
+      }).filter(function (p) { return p[1].length; });
+      if (who.length) {
+        h += '<p class="hist__by">' + who.map(function (p) {
+          return "<span>" + esc(p[0]) + " " + names(p[1], it.url) + "</span>";
         }).join("") + "</p>";
       }
       var text = excerpt(it.text);
@@ -593,6 +667,39 @@
           : table;
       }
       return h + "</li>";
+    }
+
+    /*
+     * Who took part, in the order the page reads them: the person who
+     * proposed the change, the people who commented or reviewed without
+     * approving, then who approved it. Who merged it is only named when
+     * nobody approved it, since an approval already says who signed off.
+     */
+    function people(ch, mergedBy) {
+      var p = ch.people || { commenters: [], approvers: [] };
+      var proposer = ch.user ? ch.user.login : "";
+      var approvers = p.approvers.filter(function (u) { return u.login !== proposer; });
+      var taken = [proposer].concat(approvers.map(function (u) { return u.login; }));
+      var commenters = p.commenters.filter(function (u) { return taken.indexOf(u.login) === -1; });
+      var out = [[ch.issue ? "Suggested by" : "Change proposed by", [ch.user]],
+        ["Discussed with", commenters], ["Approved by", approvers]];
+      if (!approvers.length && mergedBy) { out.push(["Merged by", [mergedBy]]); }
+      return out;
+    }
+
+    /* "@a", "@a and @b", "@a, @b and @c", "@a, @b, @c and 4 more": past
+       three names the rest is a link to the conversation on GitHub. */
+    function names(list, url) {
+      var shown = list.slice(0, 3).map(function (u) {
+        return '<a href="' + esc(u.url) + '" rel="noopener">@' + esc(u.login) + "</a>";
+      });
+      var rest = list.length - shown.length;
+      if (rest > 0) {
+        return shown.join(", ") + ' and <a href="' + esc(url) + '" rel="noopener">' + rest +
+          " more</a>";
+      }
+      if (shown.length < 2) { return shown.join(""); }
+      return shown.slice(0, -1).join(", ") + " and " + shown[shown.length - 1];
     }
 
     function diffTable(rows, after, url) {
@@ -629,28 +736,82 @@
         var a = flatten(texts[0]);
         var b = flatten(texts[1]);
         if (!a || !b) { return null; }
-        var keys = Object.keys(cfg.fields).filter(function (k) { return k in a || k in b; });
-        Object.keys(a).concat(Object.keys(b)).forEach(function (k) {
-          if (keys.indexOf(k) < 0) { keys.push(k); }
-        });
-        var rows = [];
-        keys.forEach(function (k) {
-          var x = show(k, a[k]);
-          var y = show(k, b[k]);
-          if (x !== y) { rows.push({ label: cfg.fields[k] || k, before: x, after: y }); }
-        });
-        return { rows: rows };
+        return compare(a, b);
       });
+    }
+
+    /*
+     * A change suggested from the page's editor is an issue, not a branch:
+     * its body holds the keys that change as a YAML block (and the new
+     * description, if any). Laid over the file as it is now, it gives the
+     * "after" side.
+     */
+    function suggestionDiff(currentP, body) {
+      return currentP.then(function (text) {
+        if (!text) { return null; }
+        var parts = split(text);
+        if (!parts) { return null; }
+        var y = /```ya?ml\n([\s\S]*?)\n```/.exec(body || "");
+        var d = /`# Description`:\s*```markdown\n([\s\S]*?)\n```/.exec(body || "");
+        var patch;
+        try { patch = y ? window.jsyaml.load(y[1], { schema: window.jsyaml.CORE_SCHEMA }) : {}; }
+        catch (e) { return null; }
+        if (!isObj(patch)) { return null; }
+        var after = overlay(parts.front, patch);
+        return compare(flattenObj(parts.front, parts.description),
+          flattenObj(after, d ? d[1].trim() : parts.description));
+      });
+    }
+
+    /* `patch` laid over `base`: mappings merge key by key, anything else
+       (a value, a list) replaces, and an empty value removes the key. */
+    function overlay(base, patch) {
+      var out = isObj(base) ? JSON.parse(JSON.stringify(base)) : {};
+      Object.keys(patch).forEach(function (k) {
+        var v = patch[k];
+        if (v === null || v === "") { delete out[k]; }
+        else if (isObj(v) && isObj(out[k])) { out[k] = overlay(out[k], v); }
+        else { out[k] = v; }
+      });
+      return out;
+    }
+
+    /* The fields that differ between two flattened versions, in the order
+       the page lists them. */
+    function compare(a, b) {
+      var keys = Object.keys(cfg.fields).filter(function (k) { return k in a || k in b; });
+      Object.keys(a).concat(Object.keys(b)).forEach(function (k) {
+        if (keys.indexOf(k) < 0) { keys.push(k); }
+      });
+      var rows = [];
+      keys.forEach(function (k) {
+        var x = show(k, a[k]);
+        var y = show(k, b[k]);
+        if (x !== y) { rows.push({ label: cfg.fields[k] || k, before: x, after: y }); }
+      });
+      return { rows: rows };
     }
 
     /* The file's fields as { "dotted.path": value }, plus its description. */
     function flatten(text) {
+      var parts = split(text);
+      return parts ? flattenObj(parts.front, parts.description) : null;
+    }
+
+    /* The file as {front, description}, or null if it cannot be read. */
+    function split(text) {
       text = text.replace(/\r\n/g, "\n");
       var m = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/.exec(text);
       if (!m) { return null; }
       var front;
       try { front = window.jsyaml.load(m[1], { schema: window.jsyaml.CORE_SCHEMA }) || {}; }
       catch (e) { return null; }
+      if (!isObj(front)) { return null; }
+      var d = /^#\s+Description\s*$([\s\S]*?)(?=^#\s|$(?![\s\S]))/m.exec(m[2]);
+      return { front: front, description: d ? d[1].trim() : "" };
+    }
+
+    function flattenObj(front, description) {
       var out = {};
       Object.keys(front).forEach(function (k) {
         var v = front[k];
@@ -673,8 +834,7 @@
           out[k] = v;
         }
       });
-      var d = /^#\s+Description\s*$([\s\S]*?)(?=^#\s|$(?![\s\S]))/m.exec(m[2]);
-      out.description = d ? d[1].trim() : "";
+      out.description = description || "";
       return out;
     }
 
@@ -795,6 +955,64 @@
     return u && u.login ? { login: u.login, url: u.html_url } : null;
   }
 
+  function isBot(u) {
+    return !u || u.type === "Bot" || /\[bot\]$/.test(u.login || "");
+  }
+
+  /*
+   * Everyone who took part in a pull request or an issue, from its timeline:
+   * one call returns the comments, the reviews and the inline review
+   * comments together. A review that approves makes its author an approver;
+   * any other comment or review makes its author a commenter. Bots are left
+   * out. If the timeline cannot be read, the change still shows, with only
+   * who proposed it.
+   */
+  function participants(api, number, version, ttl) {
+    return getJSON(api + "/issues/" + number + "/timeline?per_page=100", function (events) {
+      var commenters = [];
+      var approvers = [];
+      var add = function (list, u) {
+        if (isBot(u)) { return; }
+        if (!list.some(function (p) { return p.login === u.login; })) { list.push(person(u)); }
+      };
+      (events || []).forEach(function (e) {
+        if (e.event === "reviewed") {
+          var state = String(e.state || "").toLowerCase();
+          add(state === "approved" ? approvers : commenters, e.user);
+        } else if (e.event === "commented") {
+          add(commenters, e.user || e.actor);
+        } else if (e.event === "line-commented" || e.event === "commit-commented") {
+          (e.comments || []).forEach(function (c) { add(commenters, c.user); });
+        }
+      });
+      /* An approval after comments is what counts for that person. */
+      commenters = commenters.filter(function (c) {
+        return !approvers.some(function (a) { return a.login === c.login; });
+      });
+      return { commenters: commenters, approvers: approvers };
+    }, version, ttl).catch(function () { return { commenters: [], approvers: [] }; });
+  }
+
+  /*
+   * Changes suggested from this page's editor and not dealt with yet: open
+   * issues made from the specification-edit.yml form for this entry. The
+   * form writes each answer under its label, so the entry is found by the
+   * line under "### Specification id".
+   */
+  function suggestions(api, specId) {
+    return getJSON(api + "/issues?state=open&per_page=100", function (list) {
+      return list.filter(function (i) { return !i.pull_request; }).map(function (i) {
+        var m = /###\s*Specification id\s*\n+\s*(\S+)/.exec(i.body || "");
+        return {
+          issue: true, spec: m ? m[1] : "", number: i.number, title: i.title, url: i.html_url,
+          body: i.body || "", created: i.created_at, updated: i.updated_at, user: person(i.user)
+        };
+      });
+    }).then(function (list) {
+      return list.filter(function (i) { return i.spec === specId && /```ya?ml/.test(i.body); });
+    }, function () { return []; });
+  }
+
   /* A file at one commit, or null where it does not exist there. Commits
      never change, so the answer is kept for the whole session. */
   var RAW = {};
@@ -813,11 +1031,11 @@
 
   /* GET from the API, keep only what `pick` returns, and remember it for
      CACHE_MS. `version` invalidates an entry early (a pull request's head). */
-  function getJSON(url, pick, version) {
+  function getJSON(url, pick, version, ttl) {
     var key = "mdip-gh:" + url + (version ? "@" + version : "");
     try {
       var hit = JSON.parse(sessionStorage.getItem(key));
-      if (hit && Date.now() - hit.t < CACHE_MS) { return Promise.resolve(hit.v); }
+      if (hit && Date.now() - hit.t < (ttl || CACHE_MS)) { return Promise.resolve(hit.v); }
     } catch (e) { /* storage off or full: fetch */ }
     return fetch(url, { headers: { Accept: "application/vnd.github+json" } })
       .then(function (r) {

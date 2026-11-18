@@ -215,6 +215,9 @@ def new_spec_url(data):
         quote("new-specification-id.md"), quote(NEW_SPEC_TEMPLATE % blocks))
 
 
+NEW_SLUG = "new"
+
+
 def render_contribute(data, spec=None):
     """Where to change what the page shows.
 
@@ -226,26 +229,34 @@ def render_contribute(data, spec=None):
     if spec:
         title = "Something to update about %s?" % spec["short_name"]
         text = ("If any information on this page is missing, outdated or incorrect, "
-                "suggest an edit on GitHub. The coalition reviews every change in public "
+                "suggest a change. The coalition reviews every change in public "
                 "before it appears here.")
         primary = (spec_data.github_url("edit", spec["source_path"]), "pencil-outline",
                    "Suggest a change")
         secondary = (issue_url(spec), "message-alert-outline", "Report an issue")
+        third = ("../%s/" % NEW_SLUG, "plus", "Propose a new specification")
     else:
         title = "Help keep this registry accurate"
         text = ("Every specification and organization on this page is a file kept in the "
                 "open on GitHub. Anyone can suggest a change, or propose a specification "
                 "that is missing.")
-        primary = (new_spec_url(data), "plus", "Propose a specification")
+        primary = ("%s/" % NEW_SLUG, "plus", "Propose a specification")
         secondary = (spec_data.github_url("tree", "data"), "database-outline", "Browse the data")
+        third = None
+    # On a specification page the page script turns "Suggest a change" into
+    # the in-page editor; the link to GitHub's editor is what it does without
+    # JavaScript.
     return ('<section class="contribute">%s<div class="contribute__t"><h2>%s</h2><p>%s</p></div>'
             '<div class="contribute__a">'
-            '<a class="btn btn--primary" href="%s" rel="noopener">%s<span>%s</span></a>'
-            '<a class="btn" href="%s" rel="noopener">%s<span>%s</span></a>'
+            '<a class="btn btn--primary" href="%s" rel="noopener"%s>%s<span>%s</span></a>'
+            '<a class="btn" href="%s" rel="noopener">%s<span>%s</span></a>%s'
             "</div></section>"
             % (icon("github", "contribute__ico"), escape(title), escape(text),
-               escape(primary[0]), icon(primary[1]), escape(primary[2]),
-               escape(secondary[0]), icon(secondary[1]), escape(secondary[2])))
+               escape(primary[0]), " data-edit-start" if spec else "", icon(primary[1]),
+               escape(primary[2]),
+               escape(secondary[0]), icon(secondary[1]), escape(secondary[2]),
+               '<a class="btn" href="%s">%s<span>%s</span></a>'
+               % (escape(third[0]), icon(third[1]), escape(third[2])) if third else ""))
 
 
 # --------------------------------------------------------------------------
@@ -592,13 +603,45 @@ def description_html(text):
     return markdown.markdown(escape(text, quote=False), extensions=["sane_lists"])
 
 
-def dl_row(ico, label, value_html):
-    return ('<div class="glance__row"><dt>%s<span>%s</span></dt><dd>%s</dd></div>'
-            % (icon(ico), escape(label), value_html))
+def field_attrs(path, edit=True, view=None):
+    """Attributes that tie an element to one field of the entry's file.
+
+    `data-field` is the dotted path of the value in the front matter, the same
+    key the History section uses. The page editor (spec-editor.js) re-renders
+    every element bound to a field when it changes, and puts a small edit
+    button next to the ones marked `data-edit`. `view` names how the value is
+    drawn when the same field shows up in more than one form (a tag in "At a
+    glance", a card under "Licensing").
+    """
+    out = ' data-field="%s"' % escape(path)
+    if edit:
+        out += " data-edit"
+    if view:
+        out += ' data-view="%s"' % escape(view)
+    return out
 
 
-def render_detail(spec, data, base):
-    o = ['<div class="mdip-spec">']
+def edit_only(empty):
+    """Keep an element in the page for the editor, out of sight until then.
+
+    A field with no value renders nothing on the published page, but it must
+    still be there to be filled in, so the element is rendered hidden and the
+    editor reveals it.
+    """
+    return " hidden data-edit-only" if empty else ""
+
+
+def dl_row(ico, label, value_html, field=None, empty=False, view=None, edit=True):
+    dd = "<dd%s>" % (field_attrs(field, edit, view) if field else "")
+    return ('<div class="glance__row"%s><dt>%s<span>%s</span></dt>%s%s</dd></div>'
+            % (edit_only(empty), icon(ico), escape(label), dd, value_html))
+
+
+def render_detail(spec, data, base, new=False):
+    """One specification's page, or with `new` the blank page on which a
+    specification is proposed: the same layout, every field empty, opened in
+    the editor straight away."""
+    o = ['<div class="mdip-spec"%s>' % (" data-edit-new" if new else "")]
 
     o.append('<a class="spec-back" href="%s">%s<span>All specifications</span></a>'
              % (escape(base + SECTION + "/"), icon("arrow-left")))
@@ -607,14 +650,18 @@ def render_detail(spec, data, base):
     o.append('<header class="spec-hero spec-hero--%s">' % escape(spec["status_tone"]))
     o.append('<div class="spec-hero__glow" aria-hidden="true"></div>')
     o.append('<div class="spec-hero__in">')
-    o.append('<div class="spec-hero__top">%s%s</div>'
-             % (pill(spec["status_tone"], spec["status_label"]),
+    o.append('<div class="spec-hero__top"><span%s>%s</span><span data-view="meter">%s</span></div>'
+             % (field_attrs("status", False, "pill"),
+                pill(spec["status_tone"], spec["status_label"]),
                 meter(spec["criteria_met"], spec["criteria_total"])))
-    o.append("<h1>%s</h1>" % escape(spec["short_name"]))
-    if spec["full_name"] and spec["full_name"] != spec["short_name"]:
-        o.append('<p class="spec-hero__full">%s</p>' % escape(spec["full_name"]))
-    if spec["description"]:
-        o.append('<div class="spec-hero__lede">%s</div>' % description_html(spec["description"]))
+    o.append("<h1><span%s>%s</span></h1>" % (field_attrs("short_name"), escape(spec["short_name"])))
+    show_full = bool(spec["full_name"]) and spec["full_name"] != spec["short_name"]
+    o.append('<p class="spec-hero__full"%s><span%s>%s</span></p>'
+             % (edit_only(not show_full), field_attrs("full_name"),
+                escape(spec["full_name"] if show_full else "")))
+    o.append('<div class="spec-hero__lede"%s%s>%s</div>'
+             % (edit_only(not spec["description"]), field_attrs("description", view="block"),
+                description_html(spec["description"]) if spec["description"] else ""))
 
     o.append('<div class="spec-hero__actions">')
     if spec["homepage_url"]:
@@ -626,13 +673,14 @@ def render_detail(spec, data, base):
                  % (escape(spec["adopters_registry"]), icon("account-group"), icon("open-in-new")))
     o.append("</div>")
 
-    if spec["maintainers"]:
-        o.append('<div class="spec-hero__orgs"><span class="spec-hero__orgs-l">Maintained by'
-                 "</span>")
-        for org in spec["maintainers"]:
-            o.append('<span class="org-chip org-chip--lg">%s<span>%s</span></span>'
-                     % (org_logo(org, base), escape(org["name"])))
-        o.append("</div>")
+    o.append('<div class="spec-hero__orgs"%s><span class="spec-hero__orgs-l">Maintained by'
+             '</span><span class="spec-hero__orgs-v"%s>'
+             % (" hidden" if not spec["maintainers"] else "",
+                field_attrs("maintainers", False, "chips")))
+    for org in spec["maintainers"]:
+        o.append('<span class="org-chip org-chip--lg">%s<span>%s</span></span>'
+                 % (org_logo(org, base), escape(org["name"])))
+    o.append("</span></div>")
     o.append("</div></header>")
 
     # ---- in-page nav
@@ -643,7 +691,8 @@ def render_detail(spec, data, base):
         sections.append(("adoption", "Adoption", "account-group"))
     if spec["maintainers"]:
         sections.append(("maintainers", "Maintainers", "domain"))
-    sections.append(("history", "History", "history"))
+    if not new:
+        sections.append(("history", "History", "history"))
     o.append('<nav class="spec-nav" aria-label="On this page"><ul>')
     for sid, label, ico in sections:
         o.append('<li><a href="#%s">%s<span>%s</span></a></li>' % (sid, icon(ico), escape(label)))
@@ -656,39 +705,49 @@ def render_detail(spec, data, base):
     o.append('<h2 class="spec-h2">%s<span>At a glance</span></h2>' % icon("information-outline"))
     o.append('<dl class="glance">')
     o.append(dl_row("routes", "Mode", " ".join(
-        '<span class="tag tag--mode">%s</span>' % escape(m) for m in spec["modes"])))
+        '<span class="tag tag--mode">%s</span>' % escape(m) for m in spec["modes"]),
+        "modes"))
     o.append(dl_row("shield-check", "MDIP status",
                     pill(spec["status_tone"], spec["status_label"])
                     + '<span class="glance__note">%d of %d criteria met</span>'
-                      % (spec["criteria_met"], spec["criteria_total"])))
+                      % (spec["criteria_met"], spec["criteria_total"]),
+                    "status", view="pill-met"))
     o.append(dl_row("account-check", "Adoption confirmed by maintainer",
-                    pill(spec["confirmed_tone"], spec["confirmed_label"])))
-    if spec["lifecycle_label"]:
-        o.append(dl_row("chart-timeline-variant", "Lifecycle",
-                        '<span class="tag">%s</span><span class="glance__note">%s</span>'
-                        % (escape(spec["lifecycle_label"]), escape(spec["lifecycle_hint"] or ""))))
-    if spec["adoption_tier_label"]:
-        o.append(dl_row("account-group", "Adoption",
-                        '<span class="tag">%s</span>' % escape(spec["adoption_tier_label"])))
-    if spec["first_release_year"]:
-        o.append(dl_row("calendar-blank", "First release",
-                        "<strong>%d</strong>" % spec["first_release_year"]))
+                    pill(spec["confirmed_tone"], spec["confirmed_label"]),
+                    "adoption.confirmed_by_maintainer"))
+    o.append(dl_row("chart-timeline-variant", "Lifecycle",
+                    '<span class="tag">%s</span><span class="glance__note">%s</span>'
+                    % (escape(spec["lifecycle_label"] or ""), escape(spec["lifecycle_hint"] or ""))
+                    if spec["lifecycle_label"] else "",
+                    "adoption.lifecycle", not spec["lifecycle_label"]))
+    o.append(dl_row("account-group", "Adoption",
+                    '<span class="tag">%s</span>' % escape(spec["adoption_tier_label"])
+                    if spec["adoption_tier_label"] else "",
+                    "adoption.tier", not spec["adoption_tier_label"]))
+    o.append(dl_row("calendar-blank", "First release",
+                    "<strong>%d</strong>" % spec["first_release_year"]
+                    if spec["first_release_year"] else "",
+                    "first_release_year", not spec["first_release_year"]))
     o.append(dl_row("scale-balance", "Licence", " ".join(
         '<span class="tag tag--lic tag--lic-%s">%s</span>'
         % (escape(l["category"]), escape(l["id"] if l["id"] != "Other" else l["name"]))
-        for l in spec["licences"])))
-    if spec["homepage_url"]:
-        o.append(dl_row("web", "Homepage",
-                        '<a href="%s" rel="noopener">%s%s</a>'
-                        % (escape(spec["homepage_url"]), escape(spec["homepage_url"]),
-                           icon("open-in-new"))))
-    o.append('<div class="glance__row"><dt>%s<span>Registry id</span></dt>'
-             '<dd><code>%s</code></dd></div>' % (icon("tag-outline"), escape(spec["id"])))
+        for l in spec["licences"]), "licences", view="tags"))
+    o.append(dl_row("web", "Homepage",
+                    '<a href="%s" rel="noopener">%s%s</a>'
+                    % (escape(spec["homepage_url"]), escape(spec["homepage_url"]),
+                       icon("open-in-new")) if spec["homepage_url"] else "",
+                    "homepage_url", not spec["homepage_url"], view="url"))
+    if new:
+        o.append(dl_row("tag-outline", "Registry id", "", "id"))
+    else:
+        o.append('<div class="glance__row"><dt>%s<span>Registry id</span></dt>'
+                 '<dd><code>%s</code></dd></div>' % (icon("tag-outline"), escape(spec["id"])))
     o.append("</dl></section>")
 
     # ---- criteria
     o.append('<section class="spec-section" id="criteria">')
-    o.append('<h2 class="spec-h2">%s<span>MDIP criteria</span><span class="spec-h2__n">%s</span>'
+    o.append('<h2 class="spec-h2">%s<span>MDIP criteria</span>'
+             '<span class="spec-h2__n" data-view="meter">%s</span>'
              "</h2>" % (icon("shield-check"),
                         meter(spec["criteria_met"], spec["criteria_total"])))
     o.append('<div class="crits">')
@@ -700,15 +759,18 @@ def render_detail(spec, data, base):
         # opens onto the word "Yes"; its evidence link sits in the row.
         reasoning = "" if is_restatement(c["rationale"]) else c["rationale"]
         foldable = bool(reasoning)
-        o.append('<%s class="crit crit--%s">'
-                 % ("details" if foldable else "div", escape(c["tone"])))
+        base_path = "principles.%s." % c["key"]
+        o.append('<%s class="crit crit--%s" data-crit="%s">'
+                 % ("details" if foldable else "div", escape(c["tone"]), escape(c["key"])))
         o.append('<%s class="crit__head">' % ("summary" if foldable else "div"))
         o.append('<span class="crit__icon">%s</span>'
                  % icon(TONE_ICON.get(c["tone"], "help-circle")))
         o.append('<span class="crit__title"><span class="crit__label">%s</span>'
                  '<span class="crit__blurb">%s</span></span>'
                  % (escape(c["label"]), escape(c["blurb"])))
-        o.append('<span class="crit__verdict">%s</span>' % pill(c["tone"], c["verdict_label"]))
+        o.append('<span class="crit__verdict"%s>%s</span>'
+                 % (field_attrs(base_path + "verdict", view="pill"),
+                    pill(c["tone"], c["verdict_label"])))
         if foldable:
             o.append('<span class="crit__chev">%s</span>' % icon("chevron-down"))
         elif c["evidence_url"]:
@@ -721,6 +783,16 @@ def render_detail(spec, data, base):
             if c["evidence_url"]:
                 o.append(ext_link(c["evidence_url"], "Source", cls="srclink--crit"))
             o.append("</div>")
+        # The rationale and evidence as fields, for the editor: unlike the
+        # body above, it keeps a rationale that only restates the verdict.
+        o.append('<dl class="crit__edit" hidden data-edit-only>'
+                 '<div><dt>Rationale</dt><dd%s>%s</dd></div>'
+                 '<div><dt>Evidence</dt><dd%s>%s</dd></div></dl>'
+                 % (field_attrs(base_path + "rationale", view="text"),
+                    paras(c["rationale"], "crit__rationale"),
+                    field_attrs(base_path + "evidence_url", view="source"),
+                    ext_link(c["evidence_url"], "Source", cls="srclink--crit")
+                    if c["evidence_url"] else ""))
         o.append("</%s>" % ("details" if foldable else "div"))
     o.append("</div>")
     o.append(render_rules(data))
@@ -729,7 +801,7 @@ def render_detail(spec, data, base):
     # ---- licensing
     o.append('<section class="spec-section" id="licensing">')
     o.append('<h2 class="spec-h2">%s<span>Licensing</span></h2>' % icon("scale-balance"))
-    o.append('<div class="lics">')
+    o.append('<div class="lics"%s>' % field_attrs("licences", view="cards"))
     for lic in spec["licences"]:
         o.append('<article class="lic lic--%s">' % escape(lic["category"]))
         o.append('<div class="lic__head">')
@@ -754,76 +826,175 @@ def render_detail(spec, data, base):
                      % (icon("information-outline"), escape(lic["note"])))
         o.append("</article>")
     o.append("</div>")
+    o.append('<div class="lic__evidence-list"%s%s>'
+             % (edit_only(not spec["licence_evidence"]),
+                field_attrs("licence_evidence_url", view="licence-text")))
     for url in spec["licence_evidence"]:
         o.append('<p class="lic__evidence">%s</p>' % ext_link(url, "Licence text"))
+    o.append("</div>")
     o.append("</section>")
 
     # ---- adoption
-    if spec["adoption_tier_label"] or spec["adopters_count"] or spec["adopters_registry"]:
-        o.append('<section class="spec-section" id="adoption">')
-        o.append('<h2 class="spec-h2">%s<span>Adoption</span></h2>' % icon("account-group"))
-        o.append('<dl class="glance">')
-        if spec["adoption_tier_label"]:
-            o.append(dl_row("counter", "Adoption tier",
-                            '<span class="tag">%s</span>' % escape(spec["adoption_tier_label"])))
-        o.append(dl_row("account-check", "Confirmed by maintainer",
-                        pill(spec["confirmed_tone"], spec["confirmed_label"])))
-        if spec["adopters_count"]:
-            note = ""
-            if spec["adopters_count_updated"]:
-                note = ('<span class="glance__note">as of %s</span>'
-                        % escape(spec["adopters_count_updated"]))
-            o.append(dl_row("counter", "Known adopters",
-                            "<strong>%d</strong>%s" % (spec["adopters_count"], note)))
-        if spec["adopters_registry"]:
-            o.append(dl_row("database-outline", "Adopters registry",
-                            ext_link(spec["adopters_registry"], "Open registry")))
-        o.append("</dl>")
-        series = spec_history.adopters_series(spec)
-        if len(series) >= 2:
-            o.append('<div class="adopt-hist"><h3>%s<span>History</span></h3>%s</div>'
-                     % (icon("chart-line"), render_adopters_chart(series)))
-        o.append("</section>")
+    # Always rendered, so the editor can fill it in; hidden when empty.
+    has_adoption = bool(spec["adoption_tier_label"] or spec["adopters_count"]
+                        or spec["adopters_registry"])
+    o.append('<section class="spec-section" id="adoption"%s>' % edit_only(not has_adoption))
+    o.append('<h2 class="spec-h2">%s<span>Adoption</span></h2>' % icon("account-group"))
+    o.append('<dl class="glance">')
+    o.append(dl_row("counter", "Adoption tier",
+                    '<span class="tag">%s</span>' % escape(spec["adoption_tier_label"])
+                    if spec["adoption_tier_label"] else "",
+                    "adoption.tier", not spec["adoption_tier_label"]))
+    o.append(dl_row("account-check", "Confirmed by maintainer",
+                    pill(spec["confirmed_tone"], spec["confirmed_label"]),
+                    "adoption.confirmed_by_maintainer"))
+    count = spec["adopters_count"]
+    o.append(dl_row("counter", "Known adopters",
+                    '<strong%s>%s</strong><span class="glance__note"%s>%s</span>'
+                    % (field_attrs("adoption.adopters_count", view="count"),
+                       "{:,}".format(count) if count is not None else "",
+                       field_attrs("adoption.adopters_count_updated", view="as-of"),
+                       ("as of %s" % escape(spec["adopters_count_updated"]))
+                       if spec["adopters_count_updated"] else ""),
+                    empty=not count))
+    o.append(dl_row("database-outline", "Adopters registry",
+                    ext_link(spec["adopters_registry"], "Open registry")
+                    if spec["adopters_registry"] else "",
+                    "adoption.adopters_registry_url", not spec["adopters_registry"],
+                    view="registry"))
+    o.append("</dl>")
+    series = spec_history.adopters_series(spec)
+    if len(series) >= 2:
+        o.append('<div class="adopt-hist"><h3>%s<span>History</span></h3>%s</div>'
+                 % (icon("chart-line"), render_adopters_chart(series)))
+    o.append("</section>")
 
     # ---- maintainers
-    if spec["maintainers"]:
-        o.append('<section class="spec-section" id="maintainers">')
-        o.append('<h2 class="spec-h2">%s<span>Maintainers</span></h2>' % icon("domain"))
-        o.append('<div class="orgs">')
-        for org in spec["maintainers"]:
-            o.append('<article class="orgcard">%s<div class="orgcard__t">'
-                     "<h3>%s</h3><p>%s</p>" % (org_logo(org, base), escape(org["name"]),
-                                               escape(org["type_label"])))
-            if org["url"]:
-                o.append('<a href="%s" rel="noopener">%s%s</a>'
-                         % (escape(org["url"]), escape(short_url(org["url"])),
-                            icon("open-in-new")))
-            o.append("</div></article>")
-        o.append("</div>")
+    o.append('<section class="spec-section" id="maintainers"%s>'
+             % edit_only(not spec["maintainers"]))
+    o.append('<h2 class="spec-h2">%s<span>Maintainers</span></h2>' % icon("domain"))
+    o.append('<div class="orgs"%s>' % field_attrs("maintainers", view="cards"))
+    for org in spec["maintainers"]:
+        o.append('<article class="orgcard">%s<div class="orgcard__t">'
+                 "<h3>%s</h3><p>%s</p>" % (org_logo(org, base), escape(org["name"]),
+                                           escape(org["type_label"])))
+        if org["url"]:
+            o.append('<a href="%s" rel="noopener">%s%s</a>'
+                     % (escape(org["url"]), escape(short_url(org["url"])),
+                        icon("open-in-new")))
+        o.append("</div></article>")
+    o.append("</div>")
 
-        related = [s for s in data["specs"]
-                   if s["id"] != spec["id"]
-                   and set(s["maintainer_ids"]) & set(spec["maintainer_ids"])]
-        if related:
-            o.append('<div class="related"><h3>%s<span>Also maintained by these organizations'
-                     "</span></h3><ul>" % icon("source-branch"))
-            for r in sorted(related, key=lambda s: s["short_name"].lower()):
-                o.append('<li><a href="%s">%s%s<span>%s</span></a></li>'
-                         % (escape("../" + r["slug"] + "/"),
-                            icon(TONE_ICON.get(r["status_tone"], "help-circle"),
-                                 "related__i related__i--" + r["status_tone"]),
-                            "", escape(r["short_name"])))
-            o.append("</ul></div>")
-        o.append("</section>")
+    related = [s for s in data["specs"]
+               if not new and s["id"] != spec["id"]
+               and set(s["maintainer_ids"]) & set(spec["maintainer_ids"])]
+    if related:
+        o.append('<div class="related"><h3>%s<span>Also maintained by these organizations'
+                 "</span></h3><ul>" % icon("source-branch"))
+        for r in sorted(related, key=lambda s: s["short_name"].lower()):
+            o.append('<li><a href="%s">%s%s<span>%s</span></a></li>'
+                     % (escape("../" + r["slug"] + "/"),
+                        icon(TONE_ICON.get(r["status_tone"], "help-circle"),
+                             "related__i related__i--" + r["status_tone"]),
+                        "", escape(r["short_name"])))
+        o.append("</ul></div>")
+    o.append("</section>")
 
-    o.append(render_history(spec, data))
+    if not new:
+        o.append(render_history(spec, data))
 
     o.append("</div>")  # body
 
-    o.append(render_contribute(data, spec))
+    if new:
+        # The proposal is made in the page's editor; without JavaScript, the
+        # file can still be written in GitHub's editor.
+        o.append('<noscript><p class="specs-foot">Propose it <a href="%s" rel="noopener">'
+                 "as a new file on GitHub</a>.</p></noscript>" % escape(new_spec_url(data)))
+    else:
+        o.append(render_contribute(data, spec))
+
+    o.append('<script type="application/json" data-edit-config>%s</script>'
+             % json.dumps(edit_config(spec, data, new),
+                          separators=(",", ":")).replace("</", "<\\/"))
 
     o.append("</div>")
     return "\n".join(o)
+
+
+# --------------------------------------------------------------------------
+# In-page editor
+# --------------------------------------------------------------------------
+
+EDIT_TEMPLATE = "specification-edit.yml"
+
+EDIT_ICONS = (
+    "pencil-outline", "check", "close", "plus", "chevron-down", "magnify", "github",
+    "content-copy", "delete-outline", "open-in-new", "link-variant", "check-circle",
+    "alert-circle", "close-circle", "progress-clock", "help-circle", "undo-variant",
+    "account-plus-outline", "information-outline",
+)
+
+
+def _jsonable(value):
+    """The front matter as JSON: YAML dates become `YYYY-MM-DD` text."""
+    if isinstance(value, dict):
+        return dict((str(k), _jsonable(v)) for k, v in value.items())
+    if isinstance(value, list):
+        return [_jsonable(v) for v in value]
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return value
+
+
+def edit_config(spec, data, new=False):
+    """What the page editor (spec-editor.js) needs, in one object.
+
+    `front` and `description` are the file exactly as written, not the joined
+    record the page is drawn from, so that what the editor proposes is a
+    change to the file and nothing else. The vocabularies are the ones
+    `make specs-check` accepts, so the editor can only offer valid values,
+    plus a way to name a licence or a maintainer that is not listed yet.
+    """
+    if new:
+        front, sections = {}, {}
+    else:
+        front, sections = spec_data.read_entry(os.path.join(ROOT, spec["source_path"]))
+    labels = dict(history_labels(data)["fields"], id="Registry id")
+    return {
+        "new": new,
+        "ids": [s["id"] for s in data["specs"]] if new else [],
+        "id": spec["id"],
+        "name": spec["short_name"],
+        "path": spec["source_path"],
+        "repo": spec_data.GITHUB_REPO,
+        "template": EDIT_TEMPLATE,
+        "front": _jsonable(front),
+        "description": sections.get("Description", ""),
+        "labels": labels,
+        "status": [dict(id=k, label=v["label"], tone=v["tone"])
+                   for k, v in spec_data.STATUS.items()],
+        "verdict": [dict(id=k, label=v["label"], tone=v["tone"])
+                    for k, v in spec_data.VERDICT.items()],
+        "lifecycle": [dict(id=k, label=v["label"], hint=v["hint"])
+                      for k, v in spec_data.LIFECYCLE.items()],
+        "tier": [dict(id=k, label=v["label"]) for k, v in spec_data.ADOPTION_TIER.items()],
+        "confirmed": [dict(id=k, label=v["label"], tone=v["tone"])
+                      for k, v in spec_data.CONFIRMED.items()],
+        "modes": [dict(id=k, label=v) for k, v in spec_data.MODES.items()],
+        "scopes": [dict(id=k, label=v) for k, v in spec_data.LICENCE_SCOPES.items()],
+        "licence_categories": [dict(id=k, label=v)
+                               for k, v in spec_data.LICENCE_CATEGORIES.items()],
+        "licences": [dict(id=l["id"], name=l["name"], category=l["category"], url=l["url"],
+                          note=l["note"]) for l in data["licences"].values()],
+        # No logo URLs: they point at other sites, which the privacy plugin
+        # keeps out of the published pages. The editor draws monograms.
+        "organizations": [dict(id=o["id"], name=o["name"], short=o["short"], url=o["url"],
+                               type_label=o["type_label"])
+                          for o in sorted(data["organizations"].values(),
+                                          key=lambda o: o["name"].lower())],
+        "criteria": [dict(key=c["key"], label=c["label"]) for c in data["criteria"]],
+        "icons": dict((name, icon(name)) for name in EDIT_ICONS),
+    }
 
 
 def nice_ceiling(value):
@@ -942,7 +1113,7 @@ def history_labels(data):
     }
     icons = dict((name, icon(name)) for name in (
         "source-pull", "source-merge", "source-commit", "plus-circle-outline",
-        "delete-outline", "open-in-new"))
+        "delete-outline", "open-in-new", "lightbulb-on-outline"))
     return {"fields": fields, "values": values, "icons": icons}
 
 
@@ -1032,6 +1203,29 @@ def _collapse(html):
     return "\n".join(out)
 
 
+def blank_spec():
+    """A specification with nothing filled in, for the proposal page."""
+    reg = spec_data.Registry()
+    spec = reg._clean_spec(NEW_SLUG, NEW_SLUG, {"status": "under_review"}, "")
+    spec.update(short_name="", slug=NEW_SLUG, modes=[], licences=[],
+                source_path=spec_data.entry_path(spec_data.SPECS_DIR, NEW_SLUG))
+    return spec
+
+
+NEW_META = """---
+title: Propose a specification
+description: Propose a mobility specification for the MDIP registry.
+robots: noindex
+search:
+  exclude: true
+hide:
+  - navigation
+  - toc
+---
+
+"""
+
+
 def on_files(files, config):
     data = spec_data.build_dataset()
 
@@ -1054,6 +1248,10 @@ def on_files(files, config):
         body = _collapse(render_detail(spec, data, "../../"))
         files.append(File.generated(
             config, "%s/%s.md" % (SECTION, spec["slug"]), content=head + body))
+
+    files.append(File.generated(
+        config, "%s/%s.md" % (SECTION, NEW_SLUG),
+        content=NEW_META + _collapse(render_detail(blank_spec(), data, "../../", new=True))))
 
     for path, text in spec_api.build_api(data, config.get("site_url")).items():
         files.append(File.generated(config, path, content=text))

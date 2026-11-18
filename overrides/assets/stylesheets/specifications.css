@@ -550,11 +550,17 @@ buttons
   min-height: 0;
 }
 
+/* On a wide screen the panel is part of the page, not a box with its own
+   scrollbar. When it is taller than the window, the page script moves its
+   sticky offset with the scroll (see initPanelScroll): it travels down with
+   the page until its last filter is in view, and comes back up as soon as
+   the page does, so every filter is reachable with the page's own scroll.
+   --panel-top is that offset; without the script it is a plain sticky
+   panel, and a long one scrolls along with the page. */
 @media (min-width: 60em) {
   :is(.mdip-specs, .mdip-spec) .specs-panel {
     position: sticky;
-    top: calc(var(--hdr) + .8rem);
-    max-height: calc(100vh - var(--hdr) - 1.6rem);
+    top: var(--panel-top, calc(var(--hdr) + .8rem));
     padding: .55rem .6rem;
     border: 1px solid var(--line);
     border-radius: var(--r-m);
@@ -632,7 +638,7 @@ buttons
   scrollbar-width: thin;
 }
 @media (min-width: 60em) {
-  :is(.mdip-specs, .mdip-spec) .specs-panel__scroll { padding-right: .25rem; }
+  :is(.mdip-specs, .mdip-spec) .specs-panel__scroll { overflow: visible; }
 }
 
 /* -- one facet ------------------------------------------------------------- */
