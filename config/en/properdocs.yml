@@ -32,9 +32,14 @@ plugins:
   - privacy:
       links_attr_map:
         target: _blank
+      # Hosts that refuse the privacy plugin's download (e.g. 403 from the
+      # deploy server). A failed download crashes the build when the plugin
+      # later tries to copy the missing cached file, so load these directly.
       assets_exclude:
         - itxpt.org/*
         - www.eticket-deutschland.de/*
+        - www.nationalacademies.org/*
+        - mtc.ca.gov/*
 
 extra:
   analytics:
