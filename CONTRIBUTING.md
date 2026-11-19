@@ -16,9 +16,9 @@ The [specification registry](https://www.interoperablemobility.org/specification
 
 ### Rules
 
-1. **Back it with a public source.** Every change needs a link to a public document that supports it. Link as close to the evidence as you can: the exact page or section, not a home page.
-2. **Discuss in the open.** All discussion happens here on GitHub, in the pull request or issue.
-3. **No self-approval.** A change is merged only after someone from another organization, or from the MDIP Coalition, approves it. Nobody approves their own change, maintainers and Coalition members included.
+1. **Back it with a public source.** Every new assessment or verdict change needs a link to a public document that supports it. Link as close to the evidence as you can: the exact page or section.
+2. **Discuss in the open.** All discussions and decisions happen in pull requests or issues.
+3. **No self-approval.** A new or edited assessment is merged only after someone from another organization approves it.
 
 ### When it is not clear
 
