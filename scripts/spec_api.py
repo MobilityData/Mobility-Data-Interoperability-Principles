@@ -25,6 +25,7 @@ import datetime as _dt
 import io
 import json
 
+import maintainer_review
 import spec_data
 
 API_DIR = "api"
@@ -74,6 +75,7 @@ def full_record(spec, site_url):
                         "rationale": c["rationale"] or None,
                         "evidence_url": c["evidence_url"]} for c in spec["criteria"]],
         "principles_met": spec["criteria_met"],
+        "maintainer_review": maintainer_review.api_record(spec.get("review")),
         "page_url": _page(site_url, spec),
         "source_url": _source(spec["source_path"]),
     }
@@ -102,7 +104,8 @@ def export_csv(records):
     cols = ["id", "short_name", "full_name", "status", "modes", "maintainer_ids",
             "maintainer_names", "licences", "homepage_url", "first_release_year",
             "lifecycle", "adoption_tier", "adopters_count", "adopters_count_updated",
-            "adopters_registry_url", "confirmed_by_maintainer"]
+            "adopters_registry_url", "confirmed_by_maintainer",
+            "maintainer_review_status", "maintainer_review_date"]
     principle_ids = [p["id"] for p in records[0]["principles"]] if records else []
     for pid in principle_ids:
         cols += [pid + "_verdict", pid + "_rationale", pid + "_evidence_url"]
@@ -131,6 +134,9 @@ def export_csv(records):
             "description": r["description"], "page_url": r["page_url"],
             "source_url": r["source_url"],
         }
+        mr = r["maintainer_review"] or {}
+        row["maintainer_review_status"] = (mr.get("status") or {}).get("id")
+        row["maintainer_review_date"] = mr.get("date")
         for p in r["principles"]:
             row[p["id"] + "_verdict"] = p["verdict"]
             row[p["id"] + "_rationale"] = p["rationale"]
@@ -183,6 +189,10 @@ def openapi(site_url):
             "adopters_registry_url": _nullable(url),
             "confirmed_by_maintainer": _nullable({"type": "boolean"}),
         }),
+        "MaintainerReview": obj({
+            "status": obj({"id": _enum(maintainer_review.REVIEW_STATUS), "label": s}),
+            "date": _nullable(dict(s, format="date")),
+        }, ("status",)),
         "CatalogueRecord": obj({
             "id": s, "short_name": s, "full_name": _nullable(s), "summary": _nullable(s),
             "status": _enum(V.STATUS), "modes": arr(_enum(V.MODES)),
@@ -205,6 +215,8 @@ def openapi(site_url):
             "adoption": ref("Adoption"),
             "principles": arr(ref("PrincipleVerdict")),
             "principles_met": i,
+            # allOf, because OpenAPI 3.0 ignores keys set next to a $ref.
+            "maintainer_review": dict(allOf=[ref("MaintainerReview")], nullable=True),
             "page_url": url,
             "source_url": dict(url, description="The entry's file on GitHub."),
         }, ("id", "short_name", "status", "principles")),
