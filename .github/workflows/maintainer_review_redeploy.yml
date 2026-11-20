@@ -1,0 +1,65 @@
+name: Maintainer review status
+
+# The maintainer review status of each specification is the `review: ...`
+# label of its `maintainer-review` issue (see scripts/maintainer_review.py).
+# When a status label is added, this keeps it the only one, writes today's
+# date into the issue, then starts the existing deploy so the site shows it.
+#
+# Changes made here with GITHUB_TOKEN do not start this workflow again. The
+# deploy is started with workflow_dispatch, which GITHUB_TOKEN is allowed to do.
+
+on:
+  issues:
+    types: [labeled, unlabeled, closed, reopened, deleted]
+
+permissions:
+  actions: write
+  issues: write
+
+jobs:
+  status:
+    if: >-
+      github.event.action == 'labeled' &&
+      startsWith(github.event.label.name, 'review: ') &&
+      contains(github.event.issue.labels.*.name, 'maintainer-review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Keep one status label and date it
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const added = context.payload.label.name;
+            for (const l of issue.labels) {
+              if (l.name.startsWith('review: ') && l.name !== added) {
+                await github.rest.issues.removeLabel({
+                  ...context.repo, issue_number: issue.number, name: l.name });
+              }
+            }
+            const today = new Date().toISOString().slice(0, 10);
+            const re = /(### Review date\s*\n\s*\n)([^\n]*)/;
+            const body = re.test(issue.body || '')
+              ? issue.body.replace(re, `$1${today}`)
+              : `${(issue.body || '').trimEnd()}\n\n### Review date\n\n${today}\n`;
+            await github.rest.issues.update({
+              ...context.repo, issue_number: issue.number, body });
+
+  redeploy:
+    needs: status
+    # Runs after `status`, or on its own when `status` was skipped.
+    if: >-
+      always() && needs.status.result != 'failure' &&
+      (contains(github.event.issue.labels.*.name, 'maintainer-review') ||
+       github.event.label.name == 'maintainer-review')
+    runs-on: ubuntu-latest
+    # Several changes in a row queue one deploy instead of one per change.
+    concurrency:
+      group: maintainer-review-redeploy
+      cancel-in-progress: true
+    steps:
+      - name: Debounce
+        run: sleep 60
+      - name: Start the website deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update_website_contents_on_server.yml --repo "$GITHUB_REPOSITORY" --ref main

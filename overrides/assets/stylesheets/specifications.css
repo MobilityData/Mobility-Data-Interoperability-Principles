@@ -2060,3 +2060,7 @@ buttons
   :is(.mdip-specs, .mdip-spec) .specs-hero__glow,
   :is(.mdip-specs, .mdip-spec) .spec-hero__glow { animation: none; }
 }
+
+/* Maintainer review of the assessment, under "Maintained by" */
+:is(.mdip-specs, .mdip-spec) .spec-hero__review { margin: .7rem 0 0; }
+:is(.mdip-specs, .mdip-spec) .spec-hero__review-date { font-weight: 400; opacity: .8; }

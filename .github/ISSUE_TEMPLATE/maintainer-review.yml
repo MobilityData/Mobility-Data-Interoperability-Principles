@@ -1,0 +1,10 @@
+name: Maintainer review
+description: Maintainer review
+title: "Maintainer review: "
+body:
+  - type: input
+    id: spec_id
+    attributes:
+      label: Specification id
+    validations:
+      required: true

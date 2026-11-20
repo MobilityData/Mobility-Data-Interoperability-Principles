@@ -36,7 +36,8 @@ from mkdocs.structure.files import File
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
-import spec_api  # noqa: E402  (path set above)
+import maintainer_review  # noqa: E402  (path set above)
+import spec_api  # noqa: E402
 import spec_data  # noqa: E402
 import spec_history  # noqa: E402
 
@@ -637,6 +638,19 @@ def dl_row(ico, label, value_html, field=None, empty=False, view=None, edit=True
             % (edit_only(empty), icon(ico), escape(label), dd, value_html))
 
 
+def render_review(review):
+    """The line under "Maintained by": where the assessment stands in its review
+    by the maintainer. The status lives in a GitHub issue, not in the file the
+    editor changes (see scripts/maintainer_review.py)."""
+    if not review:
+        return ""
+    ico = "check-circle" if review["status"] == "reviewed" else "progress-clock"
+    date = (' <span class="spec-hero__review-date">%s</span>' % escape(review["date"])
+            if review["date"] else "")
+    return ('<p class="spec-hero__review"><span class="pill pill--%s">%s<span>%s</span>%s</span></p>'
+            % (escape(review["status_tone"]), icon(ico), escape(review["status_label"]), date))
+
+
 def render_detail(spec, data, base, new=False):
     """One specification's page, or with `new` the blank page on which a
     specification is proposed: the same layout, every field empty, opened in
@@ -681,6 +695,7 @@ def render_detail(spec, data, base, new=False):
         o.append('<span class="org-chip org-chip--lg">%s<span>%s</span></span>'
                  % (org_logo(org, base), escape(org["name"])))
     o.append("</span></div>")
+    o.append(render_review(spec.get("review")))
     o.append("</div></header>")
 
     # ---- in-page nav
@@ -1228,6 +1243,9 @@ hide:
 
 def on_files(files, config):
     data = spec_data.build_dataset()
+    reviews = maintainer_review.load(spec_data.GITHUB_REPO, {s["id"] for s in data["specs"]})
+    for spec in data["specs"]:
+        spec["review"] = reviews.get(spec["id"])
 
     for issue in data["issues"]:
         log("specifications: %s in %s: %s"
