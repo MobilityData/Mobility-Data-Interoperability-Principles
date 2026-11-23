@@ -4,7 +4,7 @@ homepage_url: https://github.com/beckn/mobility
 status: partially_compliant
 modes: [taxi_ridehail, bikeshare, shared_scooter, carsharing, microtransit_drt, public_transport]
 maintainers:
-  - Networks For Humanity
+  - nfh
 licences:
 - id: CC-BY-NC-SA-4.0
 licence_evidence_url: https://github.com/beckn/protocol-specifications-v2?tab=License-1-ov-file
