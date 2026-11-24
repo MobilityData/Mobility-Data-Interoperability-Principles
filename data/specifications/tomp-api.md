@@ -21,19 +21,19 @@ principles:
     rationale: Human-readable docs and the OpenAPI (machine-readable) specification are both published in full on GitHub (TOMP-WG/TOMP-API).
     evidence_url: https://app.swaggerhub.com/apis-docs/TOMP-API-WG/transport-operator_maas_provider_api/
   independent_maintainer:
-    verdict: partially_compliant
-    rationale: TOMP-WG operates under the Maas Alliance ecosystem - governance is industry-participant led rather than a fully independent standards body.
-    evidence_url: https://mobility-alliance.org/about-us
+    verdict: compliant
+    rationale: The TOMP-API is maintained by the open community of the TOMP-WG, which is supported by the House of TOMP, a Belgian AISBL (non-for-profit) with the sole purpose to support and disseminate.
+    evidence_url: https://www.linkedin.com/company/tomp-wg
   structured_releases:
     verdict: compliant
     rationale: Versioned GitHub releases.
     evidence_url: https://github.com/TOMP-WG/TOMP-API/wiki/Versioning-and-releases
   open_governance:
     verdict: compliant
-    rationale: Open to public GitHub contributions, but formal working-group decision-making is limited to participating members/companies.
+    rationale: Open to public GitHub contributions, and formal working-group decision-making is limited to the participants of the monthly general meetings.
     evidence_url: https://github.com/TOMP-WG/TOMP-API/blob/master/CONTRIBUTING.md
 ---
 
 # Description
 
-The TOMP-API is an interoperable open standard for technical communication between transport operators and mobility as a service providers. Compatible with GBFS, NeTEx.
+The TOMP-API is an interoperable open standard for technical communication between transport operators and mobility as a service providers. Compatible and usable in combination with GBFS, CDS, GTFS, OCPI (charging), APDS (parking), and NeTEx.
