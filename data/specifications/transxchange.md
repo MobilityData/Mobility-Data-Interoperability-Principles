@@ -13,9 +13,9 @@ adoption:
   lifecycle: active
   tier: hundred_plus
   confirmed_by_maintainer: true
-  adopters_count: 943
+  data_producers_count: 943
   adopters_count_updated: '2026-11-24'
-  adopters_registry_url: https://data.bus-data.dft.gov.uk/timetable/?area=&organisation=&status=live&start=&published_at=&submitform=submit&ordering=-modified
+  data_producers_registry_url: https://data.bus-data.dft.gov.uk/timetable/?area=&organisation=&status=live&start=&published_at=&submitform=submit&ordering=-modified
 principles:
   cost_restriction_free:
     verdict: compliant
