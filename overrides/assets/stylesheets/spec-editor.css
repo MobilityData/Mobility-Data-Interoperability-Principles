@@ -573,12 +573,15 @@ body.sed-has-bar .mdip-spec { padding-bottom: 4.5rem; }
 .mdip-spec .sed-dialog .sed-note { margin-top: .55rem; font-size: .64rem; }
 .mdip-spec .sed-dialog .sed-note.is-bad { color: var(--warn); }
 
-.mdip-spec .sed-htable .hist__t :is(th, td) { vertical-align: middle; }
+/* Numbers and headings wrap at spaces only, never inside a word or a number;
+   a narrow screen scrolls the table sideways instead. */
+.mdip-spec .sed-htable .hist__t :is(th, td) { vertical-align: middle; overflow-wrap: normal; padding: .35rem .45rem; }
+.mdip-spec .sed-htable .hist__t th { min-width: 4.5rem; }
 .mdip-spec .sed-htable .hist__t thead th { position: sticky; top: 0; z-index: 1; }
-.mdip-spec .sed-htable .sed-input { min-width: 5.5rem; padding: .25rem .4rem; font-size: .66rem; }
-.mdip-spec .sed-htable input[type="date"] { min-width: 8.5rem; }
+.mdip-spec .sed-htable .sed-input { min-width: 4.5rem; padding: .25rem .4rem; font-size: .66rem; }
+.mdip-spec .sed-htable input[type="date"] { min-width: 8rem; }
 .mdip-spec .sed-hdate { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.mdip-spec .sed-htotal { font-weight: 600; font-variant-numeric: tabular-nums; }
+.mdip-spec .sed-htotal { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .mdip-spec .sed-horigin { color: var(--ink-3); font-size: .6rem; white-space: nowrap; }
 .mdip-spec .sed-htable tr.is-edited td { background: var(--info-bg); }
 .mdip-spec .sed-htable tr.is-edited .sed-horigin { color: var(--ink-2); font-weight: 600; }
