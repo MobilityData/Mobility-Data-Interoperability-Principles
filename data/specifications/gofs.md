@@ -13,9 +13,9 @@ adoption:
   lifecycle: early_adoption
   tier: early
   confirmed_by_maintainer: true
-  adopters_count: 3
+  data_producers_count: 3
   adopters_count_updated: '2026-11-12'
-  adopters_registry_url: https://github.com/MobilityData/GOFS/blob/main/systems.csv
+  data_producers_registry_url: https://github.com/MobilityData/GOFS/blob/main/systems.csv
 principles:
   cost_restriction_free:
     verdict: compliant

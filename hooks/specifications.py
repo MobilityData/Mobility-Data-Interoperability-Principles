@@ -682,9 +682,13 @@ def render_detail(spec, data, base, new=False):
         o.append('<a class="btn btn--primary" href="%s" rel="noopener">%s<span>Specification '
                  "homepage</span>%s</a>"
                  % (escape(spec["homepage_url"]), icon("web"), icon("open-in-new")))
-    if spec["adopters_registry"]:
-        o.append('<a class="btn" href="%s" rel="noopener">%s<span>Adopters registry</span>%s</a>'
-                 % (escape(spec["adopters_registry"]), icon("account-group"), icon("open-in-new")))
+    both = spec["data_producers_registry"] and spec["data_consumers_registry"]
+    for url, label in ((spec["adopters_registry"],
+                        "Data producers registry" if both else "Adopters registry"),
+                       (both and spec["data_consumers_registry"], "Data consumers registry")):
+        if url:
+            o.append('<a class="btn" href="%s" rel="noopener">%s<span>%s</span>%s</a>'
+                     % (escape(url), icon("account-group"), label, icon("open-in-new")))
     o.append("</div>")
 
     o.append('<div class="spec-hero__orgs"%s><span class="spec-hero__orgs-l">Maintained by'
@@ -864,24 +868,32 @@ def render_detail(spec, data, base, new=False):
                     pill(spec["confirmed_tone"], spec["confirmed_label"]),
                     "adoption.confirmed_by_maintainer"))
     count = spec["adopters_count"]
+    # The total is not a field of the file: it is data producers and data
+    # consumers added up, and the editor redraws it from both.
     o.append(dl_row("counter", "Known adopters",
-                    '<strong%s>%s</strong><span class="glance__note"%s>%s</span>'
-                    % (field_attrs("adoption.adopters_count", view="count"),
-                       "{:,}".format(count) if count is not None else "",
+                    '<strong data-adopters-total>%s</strong><span class="glance__note"%s>%s</span>'
+                    % ("{:,}".format(count) if count is not None else "",
                        field_attrs("adoption.adopters_count_updated", view="as-of"),
                        ("as of %s" % escape(spec["adopters_count_updated"]))
                        if spec["adopters_count_updated"] else ""),
                     empty=not count))
-    o.append(dl_row("database-outline", "Adopters registry",
-                    ext_link(spec["adopters_registry"], "Open registry")
-                    if spec["adopters_registry"] else "",
-                    "adoption.adopters_registry_url", not spec["adopters_registry"],
-                    view="registry"))
+    for kind, ico, label in (("producers", "database-export-outline", "Data producers"),
+                             ("consumers", "database-import-outline", "Data consumers")):
+        n = spec["data_%s_count" % kind]
+        registry = spec["data_%s_registry" % kind]
+        o.append(dl_row(ico, label,
+                        '<strong%s>%s</strong><span class="glance__note"%s>%s</span>'
+                        % (field_attrs("adoption.data_%s_count" % kind, view="count"),
+                           "{:,}".format(n) if n is not None else "",
+                           field_attrs("adoption.data_%s_registry_url" % kind, view="registry"),
+                           ext_link(registry, "Open registry") if registry else ""),
+                        empty=n is None and not registry))
     o.append("</dl>")
     series = spec_history.adopters_series(spec)
-    if len(series) >= 2:
-        o.append('<div class="adopt-hist"><h3>%s<span>History</span></h3>%s</div>'
-                 % (icon("chart-line"), render_adopters_chart(series)))
+    o.append('<div class="adopt-hist"%s><h3>%s<span>History</span></h3><div%s>%s</div></div>'
+             % (edit_only(len(series) < 2), icon("chart-line"),
+                field_attrs("adoption.history", view="chart"),
+                render_adopters_chart(series) if len(series) >= 2 else ""))
     o.append("</section>")
 
     # ---- maintainers
@@ -946,7 +958,7 @@ EDIT_ICONS = (
     "pencil-outline", "check", "close", "plus", "chevron-down", "magnify", "github",
     "content-copy", "delete-outline", "open-in-new", "link-variant", "check-circle",
     "alert-circle", "close-circle", "progress-clock", "help-circle", "undo-variant",
-    "account-plus-outline", "information-outline",
+    "account-plus-outline", "information-outline", "upload-outline", "file-delimited-outline",
 )
 
 
@@ -984,6 +996,12 @@ def edit_config(spec, data, new=False):
         "repo": spec_data.GITHUB_REPO,
         "template": EDIT_TEMPLATE,
         "front": _jsonable(front),
+        # What the repository's history says, for the history table: the file's
+        # own counts and `adoption.history` rows are laid over it in the page.
+        "history_auto": [] if new else [
+            dict(date=p["date"], data_producers=p["data_producers"],
+                 data_consumers=p["data_consumers"])
+            for p in spec_history.committed_series(spec)],
         "description": sections.get("Description", ""),
         "labels": labels,
         "status": [dict(id=k, label=v["label"], tone=v["tone"])
@@ -1031,6 +1049,15 @@ def short_date(iso):
     return "%d %s %d" % (d.day, d.strftime("%b"), d.year)
 
 
+def breakdown(point):
+    """" (120 producers, 4 consumers)" when there are consumers, else nothing:
+    until consumers are counted, every adopter is a data producer."""
+    if not point["data_consumers"]:
+        return ""
+    return " (%s producers, %s consumers)" % ("{:,}".format(point["data_producers"]),
+                                              "{:,}".format(point["data_consumers"]))
+
+
 def render_adopters_chart(points):
     """Known adopters over time: one line, time across, count up from zero.
 
@@ -1069,7 +1096,8 @@ def render_adopters_chart(points):
     o.append("</svg>")
     for n, ((x, y), p) in enumerate(zip(xy, points)):
         last = n == len(points) - 1
-        tip = "%s adopters, %s" % ("{:,}".format(p["count"]), short_date(p["date"]))
+        tip = "%s adopters%s, %s" % ("{:,}".format(p["count"]), breakdown(p),
+                                     short_date(p["date"]))
         o.append('<span class="adopt-chart__dot%s" style="left:%.2f%%;top:%.2f%%" tabindex="0" '
                  'aria-label="%s"><span class="adopt-chart__tip" aria-hidden="true">%s</span>'
                  "</span>" % (" is-last" if last else "", x, y, escape(tip), escape(tip)))
@@ -1079,10 +1107,13 @@ def render_adopters_chart(points):
     o.append('<div class="adopt-chart__x" aria-hidden="true"><span>%s</span><span>%s</span></div>'
              % (short_date(points[0]["date"]), short_date(points[-1]["date"])))
     o.append('<table class="u-sr"><caption>Known adopters over time</caption><thead><tr>'
-             '<th scope="col">Date</th><th scope="col">Known adopters</th></tr></thead><tbody>')
+             '<th scope="col">Date</th><th scope="col">Data producers</th>'
+             '<th scope="col">Data consumers</th><th scope="col">Known adopters</th></tr>'
+             "</thead><tbody>")
     for p in points:
-        o.append("<tr><td>%s</td><td>%s</td></tr>"
-                 % (escape(p["date"]), "{:,}".format(p["count"])))
+        o.append("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+                 % (escape(p["date"]), "{:,}".format(p["data_producers"]),
+                    "{:,}".format(p["data_consumers"]), "{:,}".format(p["count"])))
     o.append("</tbody></table></figure>")
     return "".join(o)
 
@@ -1107,8 +1138,14 @@ def history_labels(data):
         "first_release_year": "First release",
         "adoption.lifecycle": "Lifecycle",
         "adoption.tier": "Adoption tier",
-        "adoption.adopters_count": "Known adopters",
+        "adoption.data_producers_count": "Data producers",
+        "adoption.data_consumers_count": "Data consumers",
         "adoption.adopters_count_updated": "Adopters counted on",
+        "adoption.data_producers_registry_url": "Data producers registry",
+        "adoption.data_consumers_registry_url": "Data consumers registry",
+        "adoption.history": "Adopters history",
+        # Older revisions of the files, before producers and consumers.
+        "adoption.adopters_count": "Known adopters",
         "adoption.adopters_registry_url": "Adopters registry",
         "adoption.confirmed_by_maintainer": "Confirmed by maintainer",
         "description": "Description",

@@ -13,9 +13,9 @@ first_release_year: 2018
 adoption:
   lifecycle: active
   tier: hundred_plus
-  adopters_count: 1200
+  data_producers_count: 1200
   adopters_count_updated: '2026-11-04'
-  adopters_registry_url: https://www.openmobilityfoundation.org/mds-users/
+  data_producers_registry_url: https://www.openmobilityfoundation.org/mds-users/
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:

@@ -67,8 +67,12 @@ def full_record(spec, site_url):
             "lifecycle": spec["lifecycle"],
             "tier": spec["adoption_tier"],
             "adopters_count": spec["adopters_count"],
+            "data_producers_count": spec["data_producers_count"],
+            "data_consumers_count": spec["data_consumers_count"],
             "adopters_count_updated": spec["adopters_count_updated"],
             "adopters_registry_url": spec["adopters_registry"],
+            "data_producers_registry_url": spec["data_producers_registry"],
+            "data_consumers_registry_url": spec["data_consumers_registry"],
             "confirmed_by_maintainer": {"yes": True, "no": False}.get(spec["confirmed"]),
         },
         "principles": [{"id": c["key"], "name": c["label"], "verdict": c["verdict"],
@@ -103,8 +107,10 @@ def export_csv(records):
     """One row per specification; lists are joined with "; "."""
     cols = ["id", "short_name", "full_name", "status", "modes", "maintainer_ids",
             "maintainer_names", "licences", "homepage_url", "first_release_year",
-            "lifecycle", "adoption_tier", "adopters_count", "adopters_count_updated",
-            "adopters_registry_url", "confirmed_by_maintainer",
+            "lifecycle", "adoption_tier", "adopters_count", "data_producers_count",
+            "data_consumers_count", "adopters_count_updated", "adopters_registry_url",
+            "data_producers_registry_url", "data_consumers_registry_url",
+            "confirmed_by_maintainer",
             "maintainer_review_status", "maintainer_review_date"]
     principle_ids = [p["id"] for p in records[0]["principles"]] if records else []
     for pid in principle_ids:
@@ -127,8 +133,12 @@ def export_csv(records):
             "homepage_url": r["homepage_url"], "first_release_year": r["first_release_year"],
             "lifecycle": a["lifecycle"], "adoption_tier": a["tier"],
             "adopters_count": a["adopters_count"],
+            "data_producers_count": a["data_producers_count"],
+            "data_consumers_count": a["data_consumers_count"],
             "adopters_count_updated": a["adopters_count_updated"],
             "adopters_registry_url": a["adopters_registry_url"],
+            "data_producers_registry_url": a["data_producers_registry_url"],
+            "data_consumers_registry_url": a["data_consumers_registry_url"],
             "confirmed_by_maintainer": {True: "yes", False: "no"}.get(
                 a["confirmed_by_maintainer"], "unknown"),
             "description": r["description"], "page_url": r["page_url"],
@@ -184,9 +194,15 @@ def openapi(site_url):
         "Adoption": obj({
             "lifecycle": _nullable(_enum(V.LIFECYCLE)),
             "tier": _nullable(_enum(V.ADOPTION_TIER)),
-            "adopters_count": _nullable(i),
+            "adopters_count": dict(_nullable(i), description=(
+                "Known adopters: data producers and data consumers together.")),
+            "data_producers_count": _nullable(i),
+            "data_consumers_count": _nullable(i),
             "adopters_count_updated": _nullable(dict(s, format="date")),
-            "adopters_registry_url": _nullable(url),
+            "adopters_registry_url": dict(_nullable(url), description=(
+                "The data producers registry, or the data consumers one when there is no other.")),
+            "data_producers_registry_url": _nullable(url),
+            "data_consumers_registry_url": _nullable(url),
             "confirmed_by_maintainer": _nullable({"type": "boolean"}),
         }),
         "MaintainerReview": obj({

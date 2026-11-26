@@ -841,6 +841,14 @@
     /* One value as the page words it: vocabulary labels, Yes/No, numbers. */
     function show(key, v) {
       if (v === undefined || v === null || v === "") { return ""; }
+      if (key === "adoption.history" && Array.isArray(v)) {
+        return v.map(function (r) {
+          if (!isObj(r)) { return String(r); }
+          var d = r.date instanceof Date ? r.date.toISOString().slice(0, 10) : String(r.date);
+          return d + ": " + Number(r.data_producers || 0).toLocaleString("en-US") +
+            " producers, " + Number(r.data_consumers || 0).toLocaleString("en-US") + " consumers";
+        }).join("; ");
+      }
       var vocab = cfg.values[/^principles\..+\.verdict$/.test(key) ? "verdict" : key];
       var one = function (x) {
         if (x === true) { return "Yes"; }

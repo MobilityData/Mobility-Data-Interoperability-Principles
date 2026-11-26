@@ -13,6 +13,12 @@
  * not compliant, a new adopters count takes today's date and the matching
  * tier, a licence that requires a purchase fails "Free of cost restrictions".
  *
+ * Known adopters are data producers plus data consumers. Their history (the
+ * chart in "Adoption") is read from the repository's git history at build
+ * time; the history table lets a person correct a date's counts, add dates
+ * that are missing, or import them from a CSV file. Those rows are written to
+ * the file as `adoption.history` and replace git's values for their dates.
+ *
  * Nothing is written anywhere but GitHub. The change is sent as a pre-filled
  * issue (.github/ISSUE_TEMPLATE/specification-edit.yml) that the person
  * submits with their own GitHub account, and the coalition reviews it there.
@@ -33,7 +39,9 @@
     pass: "check-circle", warn: "alert-circle", fail: "close-circle",
     info: "progress-clock", muted: "help-circle"
   };
-  var URL_FIELDS = /^(homepage_url|licence_evidence_url|adoption\.adopters_registry_url|principles\..+\.evidence_url)$/;
+  var URL_FIELDS = /^(homepage_url|licence_evidence_url|adoption\.data_(producers|consumers)_registry_url|principles\..+\.evidence_url)$/;
+  var COUNT_FIELDS = /^adoption\.data_(producers|consumers)_count$/;
+  var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
   function ready(fn) {
     if (document.readyState !== "loading") { fn(); }
@@ -127,9 +135,10 @@
     function fieldPaths() {
       var p = ["short_name", "full_name", "description", "homepage_url", "status", "modes",
         "maintainers", "licences", "licence_evidence_url", "first_release_year",
-        "adoption.lifecycle", "adoption.tier", "adoption.adopters_count",
-        "adoption.adopters_count_updated", "adoption.adopters_registry_url",
-        "adoption.confirmed_by_maintainer"];
+        "adoption.lifecycle", "adoption.tier", "adoption.data_producers_count",
+        "adoption.data_consumers_count", "adoption.adopters_count_updated",
+        "adoption.data_producers_registry_url", "adoption.data_consumers_registry_url",
+        "adoption.history", "adoption.confirmed_by_maintainer"];
       CRITERIA.forEach(function (k) {
         ["verdict", "rationale", "evidence_url"].forEach(function (f) {
           p.push("principles." + k + "." + f);
@@ -167,6 +176,11 @@
     /* Comparable form of a value: empty in any shape is one thing. */
     function key(v) {
       if (empty(v)) { return ""; }
+      if (Array.isArray(v) && isObj(v[0]) && "date" in v[0]) {
+        return JSON.stringify(v.map(function (r) {
+          return [String(r.date), r.data_producers || 0, r.data_consumers || 0];
+        }).sort());
+      }
       if (Array.isArray(v)) {
         return JSON.stringify(v.map(function (x) {
           return isObj(x) ? { id: x.id, scopes: (x.scopes || []).slice().sort(), url: x.url || "" } : x;
@@ -193,16 +207,21 @@
     function autoRules(path) {
       if (isNew && path === "id") { idByHand = !empty(get(doc, "id")); }
       if (isNew && path === "short_name" && !idByHand) { set(doc, "id", slug(get(doc, path) || "")); }
-      if (path === "adoption.adopters_count") {
-        var n = get(doc, path);
-        if (typeof n === "number") {
-          set(doc, "adoption.adopters_count_updated", today());
-          var tier = get(doc, "adoption.tier");
-          if (n >= 100) { set(doc, "adoption.tier", "hundred_plus"); }
-          else if (n === 0) { set(doc, "adoption.tier", "none"); }
-          else if (!tier || tier === "hundred_plus" || tier === "none") {
-            set(doc, "adoption.tier", "early");
-          }
+      if (COUNT_FIELDS.test(path) && typeof get(doc, path) === "number") {
+        set(doc, "adoption.adopters_count_updated", today());
+        /* A row of the history table for today would hide the new count. */
+        set(doc, "adoption.history", (get(doc, "adoption.history") || []).filter(function (r) {
+          return String(r.date) !== today();
+        }));
+      }
+      if (COUNT_FIELDS.test(path) || path === "adoption.history") {
+        var n = totalAdopters();
+        var tier = get(doc, "adoption.tier");
+        if (n === null) { /* nothing to go on */ }
+        else if (n >= 100) { set(doc, "adoption.tier", "hundred_plus"); }
+        else if (n === 0) { set(doc, "adoption.tier", "none"); }
+        else if (!tier || tier === "hundred_plus" || tier === "none") {
+          set(doc, "adoption.tier", "early");
         }
       }
       if (path === "licences" && CRITERIA.indexOf("cost_restriction_free") !== -1) {
@@ -222,6 +241,40 @@
         else if (get(doc, "status") === "inactive") { deriveStatus(true); }
       }
       if (/\.verdict$/.test(path) || path === "licences") { deriveStatus(false); }
+    }
+
+    /* Known adopters: data producers and data consumers together, or null
+       when neither is known. */
+    function totalAdopters() {
+      var pr = get(doc, "adoption.data_producers_count");
+      var co = get(doc, "adoption.data_consumers_count");
+      if (typeof pr !== "number" && typeof co !== "number") { return null; }
+      return (typeof pr === "number" ? pr : 0) + (typeof co === "number" ? co : 0);
+    }
+
+    /* The counts over time, as the page's chart draws them (see
+       scripts/spec_history.py): the repository's history, then the file's
+       current counts, then its `adoption.history` rows, each replacing the
+       one before for a date they share. `source` says which layer won. */
+    function adoptersSeries() {
+      var points = {};
+      var put = function (date, pr, co, source) {
+        points[date] = { date: date, p: pr || 0, c: co || 0, source: source };
+      };
+      (cfg.history_auto || []).forEach(function (r) {
+        put(r.date, r.data_producers, r.data_consumers, "git");
+      });
+      var pr = get(doc, "adoption.data_producers_count");
+      var co = get(doc, "adoption.data_consumers_count");
+      if (typeof pr === "number" || typeof co === "number") {
+        var date = String(get(doc, "adoption.adopters_count_updated") || today());
+        var was = points[date];
+        if (!was || was.p !== (pr || 0) || was.c !== (co || 0)) { put(date, pr, co, "current"); }
+      }
+      (get(doc, "adoption.history") || []).forEach(function (r) {
+        put(String(r.date), r.data_producers, r.data_consumers, "manual");
+      });
+      return Object.keys(points).sort().map(function (d) { return points[d]; });
     }
 
     /* The status the verdicts imply, as `make specs-check` works it out. An
@@ -324,7 +377,8 @@
       };
       bound().forEach(keep);
       Array.prototype.forEach.call(root.querySelectorAll(
-        "[data-edit-only], .crit, [data-view=meter], .spec-hero, .spec-hero__orgs"), keep);
+        "[data-edit-only], .crit, [data-view=meter], [data-adopters-total], .spec-hero, " +
+        ".spec-hero__orgs"), keep);
       Array.prototype.forEach.call(root.querySelectorAll(".crit__icon"), keep);
     }
 
@@ -353,7 +407,7 @@
           openEditor(path, b);
         });
         el._pen = b;
-        if (el.getAttribute("data-view") === "block" || el.getAttribute("data-view") === "cards") {
+        if (/^(block|cards|chart)$/.test(el.getAttribute("data-view") || "")) {
           el.classList.add("sed-block");
         }
         el.appendChild(b);
@@ -363,9 +417,10 @@
 
     /* After a change: redraw what differs from what is on screen, flash what
        a rule changed on its own, save the draft. */
-    function commit(path, value) {
+    function commit(path, value, also) {
       var before = {};
       PATHS.forEach(function (p) { before[p] = key(get(doc, p)); });
+      Object.keys(also || {}).forEach(function (p) { set(doc, p, also[p]); });
       set(doc, path, value);
       autoRules(path);
       bound().forEach(function (el) {
@@ -410,6 +465,14 @@
       });
       Array.prototype.forEach.call(root.querySelectorAll('[data-field=status][data-view=pill-met]'),
         function (el) { draw(el, "status"); });
+      var total = totalAdopters();
+      Array.prototype.forEach.call(root.querySelectorAll("[data-adopters-total]"), function (el) {
+        el.innerHTML = total === null ? notSet() : esc(total.toLocaleString("en-US"));
+      });
+      if (editing) {
+        Array.prototype.forEach.call(root.querySelectorAll('[data-field="adoption.history"]'),
+          function (el) { draw(el, "adoption.history"); });
+      }
       var orgs = root.querySelector(".spec-hero__orgs");
       if (orgs) { orgs.hidden = empty(doc.maintainers); }
       var hero = root.querySelector(".spec-hero");
@@ -454,9 +517,10 @@
         return empty(v) ? notSet() : paras(String(v), path === "description" ? "" : "crit__rationale");
       }
       if (/\.evidence_url$/.test(path)) { return empty(v) ? notSet() : srclink(v, "Source", "srclink--crit"); }
-      if (path === "adoption.adopters_registry_url") {
-        return empty(v) ? notSet() : srclink(v, "Open registry");
+      if (/^adoption\.data_\w+_registry_url$/.test(path)) {
+        return empty(v) ? notSet("Registry") : srclink(v, "Open registry");
       }
+      if (path === "adoption.history") { return historyView(); }
       if (path === "licence_evidence_url") {
         return empty(v) ? notSet("Licence text") : [].concat(v).map(function (u) {
           return '<p class="lic__evidence">' + srclink(u, "Licence text") + "</p>";
@@ -492,7 +556,7 @@
       if (path === "first_release_year") {
         return empty(v) ? notSet() : "<strong>" + esc(v) + "</strong>";
       }
-      if (path === "adoption.adopters_count") {
+      if (COUNT_FIELDS.test(path)) {
         return empty(v) ? notSet() : esc(Number(v).toLocaleString("en-US"));
       }
       if (path === "adoption.adopters_count_updated") {
@@ -732,7 +796,8 @@
       if (path === "licence_evidence_url") { return textEditor(path, from, "urls"); }
       if (URL_FIELDS.test(path)) { return textEditor(path, from, "url"); }
       if (path === "first_release_year") { return textEditor(path, from, "year"); }
-      if (path === "adoption.adopters_count") { return textEditor(path, from, "count"); }
+      if (COUNT_FIELDS.test(path)) { return textEditor(path, from, "count"); }
+      if (path === "adoption.history") { return historyEditor(); }
       if (path === "adoption.adopters_count_updated") { return textEditor(path, from, "date"); }
       return textEditor(path, from, "text");
     }
@@ -1175,6 +1240,448 @@
       redraw();
     }
 
+    /* ======================================================= adopters history */
+
+    var SOURCE_LABEL = {
+      git: "From the registry's history", current: "Current count",
+      manual: "Entered by hand", added: "New row", imported: "Imported"
+    };
+
+    /* `adoption.history` as written in the file: one row per date, by date. */
+    function historyRows(list) {
+      return (list || []).map(function (r) {
+        return { date: String(r.date), data_producers: r.data_producers || 0,
+          data_consumers: r.data_consumers || 0 };
+      }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    }
+
+    function fmt(n) { return Number(n).toLocaleString("en-US"); }
+
+    function shortDate(iso) {
+      var d = new Date(iso + "T00:00:00Z");
+      return d.getUTCDate() + " " + d.toLocaleString("en-US", { month: "short", timeZone: "UTC" }) +
+        " " + d.getUTCFullYear();
+    }
+
+    /* The chart under "History", or what stands in for it while there are
+       fewer than two dates. */
+    function historyView() {
+      var pts = adoptersSeries();
+      if (pts.length >= 2) { return chartHtml(pts); }
+      if (pts.length === 1) {
+        return '<p class="adopt-hist__one">One count so far: ' + fmt(pts[0].p + pts[0].c) +
+          " on " + esc(shortDate(pts[0].date)) + ". Add earlier dates to draw the history.</p>";
+      }
+      return notSet("History");
+    }
+
+    /* The same chart as render_adopters_chart in hooks/specifications.py. */
+    function chartHtml(pts) {
+      var day = function (iso) { return Date.parse(iso + "T00:00:00Z") / 864e5; };
+      var d0 = day(pts[0].date);
+      var span = Math.max(day(pts[pts.length - 1].date) - d0, 1);
+      var max = Math.max.apply(null, pts.map(function (p) { return p.p + p.c; }));
+      var top = niceCeiling(max);
+      var xy = pts.map(function (p) {
+        return [(day(p.date) - d0) * 100 / span, 100 - (p.p + p.c) * 100 / top];
+      });
+      var line = xy.map(function (c) { return c[0].toFixed(2) + "," + c[1].toFixed(2); }).join(" ");
+      var h = '<figure class="adopt-chart"><div class="adopt-chart__plot">';
+      [[top, 0], [top / 2, 50], [0, 100]].forEach(function (t) {
+        h += '<span class="adopt-chart__y" style="top:' + t[1] + '%" aria-hidden="true">' +
+          (t[0] === Math.floor(t[0]) ? fmt(t[0]) : t[0]) + "</span>";
+      });
+      h += '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">' +
+        '<line class="adopt-chart__grid" x1="0" x2="100" y1="0" y2="0" vector-effect="non-scaling-stroke"/>' +
+        '<line class="adopt-chart__grid" x1="0" x2="100" y1="50" y2="50" vector-effect="non-scaling-stroke"/>' +
+        '<line class="adopt-chart__base" x1="0" x2="100" y1="100" y2="100" vector-effect="non-scaling-stroke"/>' +
+        '<polygon class="adopt-chart__area" points="0,100 ' + line + ' 100,100"/>' +
+        '<polyline class="adopt-chart__line" points="' + line + '" vector-effect="non-scaling-stroke"/></svg>';
+      pts.forEach(function (p, i) {
+        var tip = fmt(p.p + p.c) + " adopters" +
+          (p.c ? " (" + fmt(p.p) + " producers, " + fmt(p.c) + " consumers)" : "") + ", " +
+          shortDate(p.date);
+        h += '<span class="adopt-chart__dot' + (i === pts.length - 1 ? " is-last" : "") +
+          '" style="left:' + xy[i][0].toFixed(2) + "%;top:" + xy[i][1].toFixed(2) +
+          '%" tabindex="0" aria-label="' + esc(tip) + '"><span class="adopt-chart__tip" ' +
+          'aria-hidden="true">' + esc(tip) + "</span></span>";
+      });
+      var last = xy[xy.length - 1];
+      h += '<span class="adopt-chart__val" style="left:' + last[0].toFixed(2) + "%;top:" +
+        last[1].toFixed(2) + '%" aria-hidden="true">' +
+        fmt(pts[pts.length - 1].p + pts[pts.length - 1].c) + "</span></div>";
+      h += '<div class="adopt-chart__x" aria-hidden="true"><span>' + esc(shortDate(pts[0].date)) +
+        "</span><span>" + esc(shortDate(pts[pts.length - 1].date)) + "</span></div></figure>";
+      return h;
+    }
+
+    function niceCeiling(value) {
+      if (value <= 0) { return 1; }
+      var target = value * 1.1;
+      var mag = Math.pow(10, Math.floor(Math.log10(target)));
+      var steps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+      for (var i = 0; i < steps.length; i++) {
+        if (steps[i] * mag >= target) {
+          return steps[i] * mag >= 1 ? Math.round(steps[i] * mag) : steps[i] * mag;
+        }
+      }
+      return 10 * mag;
+    }
+
+    /*
+     * The history as a table to correct. Every date the chart knows is a row,
+     * filled in from the registry's history; a value typed over it replaces
+     * it. Rows can be added by hand or from a CSV file (date, data_producers,
+     * data_consumers), and a CSV value for a date already in the table
+     * overwrites it. On Apply, the newest row becomes the current count, and
+     * only rows that say something git does not are kept in the file.
+     */
+    function historyEditor() {
+      var GIT = {};
+      (cfg.history_auto || []).forEach(function (r) {
+        GIT[r.date] = { p: r.data_producers || 0, c: r.data_consumers || 0 };
+      });
+      var rows = adoptersSeries().map(function (pt) {
+        return { date: pt.date, p: String(pt.p), c: String(pt.c), source: pt.source,
+          fixed: pt.source === "current" || !!GIT[pt.date] };
+      });
+
+      var dlg = document.createElement("dialog");
+      dlg.className = "sed-dialog sed-dialog--wide";
+      dlg.setAttribute("aria-labelledby", "sed-hist-title");
+      dlg.innerHTML =
+        '<form method="dialog" class="sed-dialog__in">' +
+        '<h2 id="sed-hist-title">Adopters history</h2>' +
+        "<p>Counts already in the registry's history are filled in. Type over a value to " +
+        "correct it, add a row for a missing date, or import a CSV file. Known adopters are " +
+        "data producers plus data consumers.</p>" +
+        '<div class="sed-drop" data-drop tabindex="-1">' + ICON["file-delimited-outline"] +
+        '<div><p><strong>Drop a CSV file here</strong> or <button type="button" class="sed-link" ' +
+        'data-pick>choose a file</button>.</p><p class="sed-drop__h">Columns <code>date</code> ' +
+        "(YYYY-MM-DD), <code>data_producers</code>, <code>data_consumers</code>. A single count " +
+        "column is read as data producers. A date already in the table is overwritten.</p></div>" +
+        '<input type="file" accept=".csv,text/csv,text/plain" hidden data-file></div>' +
+        '<p class="sed-note" data-note role="status" hidden></p>' +
+        '<div class="hist__scroll sed-htable"><table class="hist__t"><thead><tr>' +
+        '<th scope="col">Date</th><th scope="col">Data producers</th>' +
+        '<th scope="col">Data consumers</th><th scope="col">Known adopters</th>' +
+        '<th scope="col">Origin</th><th scope="col"><span class="u-sr">Actions</span></th>' +
+        "</tr></thead><tbody data-rows></tbody></table></div>" +
+        '<div class="sed-htools"><button type="button" class="ghost sed-add" data-add>' + ICON.plus +
+        "<span>Add a row</span></button>" +
+        '<button type="button" class="ghost" data-export>' + ICON["upload-outline"] +
+        "<span>Download as CSV</span></button></div>" +
+        '<p class="sed-err" data-err hidden></p>' +
+        '<div class="sed-dialog__foot"><button type="button" class="ghost" data-cancel>Cancel' +
+        '</button><button type="button" class="btn btn--primary" data-apply>' + ICON.check +
+        "<span>Apply</span></button></div></form>";
+      root.appendChild(dlg);
+      var body = dlg.querySelector("[data-rows]");
+      var note = dlg.querySelector("[data-note]");
+      var err = dlg.querySelector("[data-err]");
+      var file = dlg.querySelector("[data-file]");
+      var drop = dlg.querySelector("[data-drop]");
+
+      function sortRows() {
+        rows.sort(function (a, b) {
+          if (!a.date || !b.date) { return a.date ? -1 : b.date ? 1 : 0; }
+          return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+        });
+      }
+
+      function num(v) { return /^\d+$/.test(String(v).trim()) ? Number(String(v).trim()) : null; }
+
+      function drawRows(focusLast) {
+        body.innerHTML = "";
+        rows.forEach(function (row, i) {
+          var tr = document.createElement("tr");
+          var base = GIT[row.date];
+          var edited = !!base && (num(row.p) !== base.p || num(row.c) !== base.c);
+          tr.className = edited ? "is-edited" : "";
+          tr.innerHTML =
+            "<td>" + (row.fixed ? '<span class="sed-hdate">' + esc(row.date) + "</span>"
+              : '<input class="sed-input" type="date" aria-label="Date" data-k="date">') + "</td>" +
+            '<td><input class="sed-input" type="number" min="0" step="1" inputmode="numeric" ' +
+            'aria-label="Data producers on ' + esc(row.date || "new date") + '" data-k="p"></td>' +
+            '<td><input class="sed-input" type="number" min="0" step="1" inputmode="numeric" ' +
+            'aria-label="Data consumers on ' + esc(row.date || "new date") + '" data-k="c"></td>' +
+            '<td class="sed-htotal" data-total></td>' +
+            '<td class="sed-horigin">' + esc(edited ? "Corrected" : SOURCE_LABEL[row.source] || "") +
+            "</td><td></td>";
+          tr.querySelectorAll("input").forEach(function (inp) {
+            var k = inp.getAttribute("data-k");
+            inp.value = row[k];
+            inp.addEventListener("input", function () {
+              row[k] = inp.value.trim();
+              total();
+              var b = GIT[row.date];
+              var ed = !!b && (num(row.p) !== b.p || num(row.c) !== b.c);
+              tr.classList.toggle("is-edited", !!ed);
+              tr.querySelector(".sed-horigin").textContent = ed ? "Corrected" : SOURCE_LABEL[row.source] || "";
+            });
+          });
+          function total() {
+            var a = num(row.p), b = num(row.c);
+            tr.querySelector("[data-total]").textContent =
+              a === null && b === null ? "" : fmt((a || 0) + (b || 0));
+          }
+          total();
+          var act = tr.lastChild;
+          if (!row.fixed || GIT[row.date]) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "sed-icon";
+            if (row.fixed) {
+              b.setAttribute("aria-label", "Restore the value from the registry's history");
+              b.title = "Restore";
+              b.innerHTML = ICON["undo-variant"];
+              b.hidden = !edited;
+              b.addEventListener("click", function () {
+                row.p = String(GIT[row.date].p);
+                row.c = String(GIT[row.date].c);
+                drawRows();
+              });
+              tr.querySelectorAll("input").forEach(function (inp) {
+                inp.addEventListener("input", function () {
+                  b.hidden = !tr.classList.contains("is-edited");
+                });
+              });
+            } else {
+              b.setAttribute("aria-label", "Remove this row");
+              b.title = "Remove";
+              b.innerHTML = ICON["delete-outline"];
+              b.addEventListener("click", function () {
+                rows.splice(i, 1);
+                drawRows();
+              });
+            }
+            act.appendChild(b);
+          }
+          body.appendChild(tr);
+        });
+        if (!rows.length) {
+          body.innerHTML = '<tr><td colspan="6" class="is-empty">No counts yet. Add a row or ' +
+            "import a CSV file.</td></tr>";
+        }
+        if (focusLast) {
+          var ins = body.querySelectorAll('input[data-k="date"]');
+          if (ins.length) {
+            ins[ins.length - 1].focus();
+            ins[ins.length - 1].scrollIntoView({ block: "nearest" });
+          }
+        }
+      }
+
+      function say(text, bad) {
+        note.textContent = text;
+        note.hidden = !text;
+        note.classList.toggle("is-bad", !!bad);
+      }
+
+      function importCsv(text) {
+        var parsed = parseCsv(text);
+        if (parsed.error) { say(parsed.error, true); return; }
+        var added = 0, updated = 0;
+        parsed.rows.forEach(function (r) {
+          var row = null;
+          for (var i = 0; i < rows.length; i++) { if (rows[i].date === r.date) { row = rows[i]; } }
+          if (!row) {
+            rows.push({ date: r.date, p: String(r.p === null ? 0 : r.p),
+              c: String(r.c === null ? 0 : r.c), source: "imported", fixed: false });
+            added++;
+            return;
+          }
+          if (r.p !== null) { row.p = String(r.p); }
+          if (r.c !== null) { row.c = String(r.c); }
+          updated++;
+        });
+        sortRows();
+        drawRows();
+        var msg = "Imported " + (added + updated) + (added + updated === 1 ? " row" : " rows") +
+          ": " + added + " added, " + updated + " overwritten.";
+        if (parsed.problems.length) {
+          msg += " Skipped: " + parsed.problems.slice(0, 4).join("; ") +
+            (parsed.problems.length > 4 ? "; and " + (parsed.problems.length - 4) + " more" : "") + ".";
+        }
+        say(msg, parsed.problems.length > 0);
+      }
+
+      function readFile(f) {
+        if (!f) { return; }
+        var reader = new FileReader();
+        reader.onload = function () { importCsv(String(reader.result || "")); };
+        reader.onerror = function () { say("The file could not be read.", true); };
+        reader.readAsText(f);
+      }
+
+      dlg.querySelector("[data-pick]").addEventListener("click", function () { file.click(); });
+      file.addEventListener("change", function () { readFile(file.files[0]); file.value = ""; });
+      ["dragenter", "dragover"].forEach(function (t) {
+        dlg.addEventListener(t, function (e) {
+          e.preventDefault();
+          drop.classList.add("is-over");
+        });
+      });
+      ["dragleave", "drop"].forEach(function (t) {
+        dlg.addEventListener(t, function (e) {
+          if (t === "dragleave" && dlg.contains(e.relatedTarget)) { return; }
+          e.preventDefault();
+          drop.classList.remove("is-over");
+          if (t === "drop" && e.dataTransfer && e.dataTransfer.files.length) {
+            readFile(e.dataTransfer.files[0]);
+          }
+        });
+      });
+      dlg.querySelector("[data-add]").addEventListener("click", function () {
+        rows.push({ date: "", p: "", c: "", source: "added", fixed: false });
+        drawRows(true);
+      });
+      dlg.querySelector("[data-export]").addEventListener("click", function () {
+        var csv = "date,data_producers,data_consumers\n" + rows.filter(function (r) {
+          return r.date;
+        }).map(function (r) { return [r.date, num(r.p) || 0, num(r.c) || 0].join(","); }).join("\n") + "\n";
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+        a.download = (cfg.id || "specification") + "-adopters-history.csv";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+      });
+      dlg.querySelector("[data-cancel]").addEventListener("click", function () { dlg.close(); });
+      dlg.querySelector("[data-apply]").addEventListener("click", apply);
+      dlg.addEventListener("close", function () { dlg.remove(); });
+
+      function apply() {
+        var problems = [];
+        var seen = {};
+        var clean = [];
+        rows.forEach(function (r, i) {
+          if (!r.date && r.p === "" && r.c === "") { return; }
+          var where = r.date || "row " + (i + 1);
+          if (!validDate(r.date)) { problems.push(where + ": enter a date"); return; }
+          if (seen[r.date]) { problems.push(r.date + " appears twice"); return; }
+          seen[r.date] = true;
+          var p = r.p === "" ? 0 : num(r.p), c = r.c === "" ? 0 : num(r.c);
+          if (p === null || c === null) { problems.push(r.date + ": counts are whole numbers"); return; }
+          clean.push({ date: r.date, p: p, c: c, source: r.source });
+        });
+        if (problems.length) {
+          err.textContent = problems.slice(0, 3).join(". ") + ".";
+          err.hidden = false;
+          return;
+        }
+        clean.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+        /* The newest row is the count shown as "Known adopters". */
+        var also = {};
+        var updated = String(get(doc, "adoption.adopters_count_updated") || "");
+        var newest = clean[clean.length - 1];
+        var current = null;
+        var same = newest && newest.source === "current" &&
+          newest.p === (get(doc, "adoption.data_producers_count") || 0) &&
+          newest.c === (get(doc, "adoption.data_consumers_count") || 0);
+        if (newest && newest.date >= updated) {
+          current = newest;
+        }
+        if (current && !same) {
+          also["adoption.data_producers_count"] = newest.p;
+          also["adoption.data_consumers_count"] = newest.c || null;
+          also["adoption.adopters_count_updated"] = newest.date;
+        }
+        /* Keep what git does not already say for that date. */
+        var history = clean.filter(function (r) {
+          if (r === current) { return false; }
+          var g = GIT[r.date];
+          return !g || g.p !== r.p || g.c !== r.c;
+        }).map(function (r) {
+          return { date: r.date, data_producers: r.p, data_consumers: r.c };
+        });
+        dlg.close();
+        if (key(history) !== key(get(doc, "adoption.history")) ||
+            Object.keys(also).some(function (p) { return key(also[p]) !== key(get(doc, p)); })) {
+          commit("adoption.history", history, also);
+        }
+      }
+
+      drawRows();
+      dlg.showModal();
+    }
+
+    function validDate(s) {
+      if (!DATE_RE.test(s || "")) { return false; }
+      var d = new Date(s + "T00:00:00Z");
+      return !isNaN(d) && d.toISOString().slice(0, 10) === s;
+    }
+
+    /* Rows of a CSV file: {rows: [{date, p, c}], problems: [...]} or {error}.
+       Comma, semicolon or tab separated, with or without a header. A count
+       left blank is null, so it leaves the table's value as it was. */
+    function parseCsv(text) {
+      text = String(text).replace(/^﻿/, "").replace(/\r\n?/g, "\n");
+      var lines = text.split("\n").filter(function (l) { return l.trim(); });
+      if (!lines.length) { return { error: "The file is empty." }; }
+      var first = lines[0];
+      var sep = first.indexOf("\t") !== -1 ? "\t" :
+        (first.split(";").length > first.split(",").length ? ";" : ",");
+      var cells = function (line) {
+        var out = [], cur = "", q = false;
+        for (var i = 0; i < line.length; i++) {
+          var ch = line[i];
+          if (q) {
+            if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+            else if (ch === '"') { q = false; }
+            else { cur += ch; }
+          } else if (ch === '"') { q = true; }
+          else if (ch === sep) { out.push(cur.trim()); cur = ""; }
+          else { cur += ch; }
+        }
+        out.push(cur.trim());
+        return out;
+      };
+      var head = cells(first).map(function (h) { return h.toLowerCase().replace(/[\s-]+/g, "_"); });
+      var col = { date: 0, p: 1, c: 2 };
+      var start = 0;
+      if (!DATE_RE.test(cells(first)[0] || "")) {
+        var find = function (names) {
+          for (var i = 0; i < head.length; i++) { if (names.indexOf(head[i]) !== -1) { return i; } }
+          return -1;
+        };
+        col.date = find(["date", "day"]);
+        col.p = find(["data_producers", "data_producer", "producers", "producer",
+          "data_producers_count", "adopters", "adopters_count", "count"]);
+        col.c = find(["data_consumers", "data_consumer", "consumers", "consumer",
+          "data_consumers_count"]);
+        if (col.date === -1) { return { error: "The file needs a “date” column." }; }
+        if (col.p === -1 && col.c === -1) {
+          if (head.length === 2) { col.p = col.date === 0 ? 1 : 0; }
+          else { return { error: "The file needs a data_producers or data_consumers column." }; }
+        }
+        start = 1;
+      }
+      var rows = [], problems = [], seen = {};
+      var count = function (v) {
+        if (v === undefined || v === "") { return null; }
+        v = v.replace(/[\s  ',]/g, "");
+        return /^\d+$/.test(v) ? Number(v) : NaN;
+      };
+      for (var i = start; i < lines.length; i++) {
+        var c = cells(lines[i]);
+        var date = c[col.date] || "";
+        var line = "line " + (i + 1);
+        if (!validDate(date)) { problems.push(line + ": date must be YYYY-MM-DD"); continue; }
+        var p = col.p === -1 ? null : count(c[col.p]);
+        var co = col.c === -1 ? null : count(c[col.c]);
+        if (isNaN(p) || isNaN(co)) { problems.push(line + ": counts must be whole numbers"); continue; }
+        if (p === null && co === null) { problems.push(line + ": no count"); continue; }
+        if (seen[date]) { problems.push(line + ": " + date + " appears twice"); continue; }
+        seen[date] = true;
+        rows.push({ date: date, p: p, c: co });
+      }
+      if (!rows.length) {
+        return { error: "No row could be read" + (problems.length ? " (" + problems[0] + ")." : ".") };
+      }
+      return { rows: rows, problems: problems };
+    }
+
     /* ============================================================ edit bar */
 
     function showBar() {
@@ -1294,7 +1801,13 @@
           return l.id + (l.scopes && l.scopes.length ? " (" + l.scopes.join(", ") + ")" : "");
         }).join(", ");
       }
-      if (path === "adoption.adopters_count") { return Number(v).toLocaleString("en-US"); }
+      if (COUNT_FIELDS.test(path)) { return Number(v).toLocaleString("en-US"); }
+      if (path === "adoption.history") {
+        return v.map(function (r) {
+          return r.date + ": " + Number(r.data_producers || 0).toLocaleString("en-US") +
+            " producers, " + Number(r.data_consumers || 0).toLocaleString("en-US") + " consumers";
+        }).join("; ");
+      }
       return Array.isArray(v) ? v.join(", ") : String(v);
     }
 
@@ -1318,6 +1831,7 @@
             return o;
           });
         }
+        if (p === "adoption.history") { v = historyRows(v); }
         var parts = p.split(".");
         var at = out;
         for (var i = 0; i < parts.length - 1; i++) {
@@ -1362,10 +1876,12 @@
       if (!empty(doc.licence_evidence_url)) { f.licence_evidence_url = doc.licence_evidence_url; }
       f.first_release_year = empty(doc.first_release_year) ? null : doc.first_release_year;
       f.adoption = { lifecycle: a.lifecycle || null, tier: a.tier || null };
-      ["adopters_count", "adopters_count_updated", "adopters_registry_url",
+      ["data_producers_count", "data_consumers_count", "adopters_count_updated",
+        "data_producers_registry_url", "data_consumers_registry_url",
         "confirmed_by_maintainer"].forEach(function (k) {
         if (!empty(a[k])) { f.adoption[k] = a[k]; }
       });
+      if (!empty(a.history)) { f.adoption.history = historyRows(a.history); }
       f.principles = {};
       CRITERIA.forEach(function (k) {
         var c = doc.principles[k] || {};

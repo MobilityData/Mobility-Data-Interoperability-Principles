@@ -68,10 +68,15 @@ first_release_year: 2006
 adoption:
   lifecycle: active
   tier: hundred_plus
-  adopters_count: 2950
+  data_producers_count: 2950
+  data_consumers_count: 40
   adopters_count_updated: '2026-09-29'
-  adopters_registry_url: https://mobilitydatabase.org/feeds?gtfs=true
+  data_producers_registry_url: https://mobilitydatabase.org/feeds?gtfs=true
   confirmed_by_maintainer: true
+  history:
+  - date: '2024-01-15'
+    data_producers: 2400
+    data_consumers: 25
 principles:
   cost_restriction_free:
     verdict: compliant
@@ -98,14 +103,37 @@ Travel information: Transit schedules, geography, fares.
 | `first_release_year` | Four-digit year. |
 | `adoption.lifecycle` | `active`, `early_adoption`, `pilot_adoption`, `pre_adoption` or `inactive`. |
 | `adoption.tier` | `hundred_plus`, `early`, `pilot` or `none`. |
-| `adoption.adopters_count` | Whole number of known adopters. |
-| `adoption.adopters_count_updated` | Date the count was taken. |
-| `adoption.adopters_registry_url` | URL of a public list of adopters. |
+| `adoption.data_producers_count` | Whole number of known data producers (organizations that publish data in the format). |
+| `adoption.data_consumers_count` | Whole number of known data consumers (applications or organizations that use the data). Known adopters, as shown on the site, are both counts added up. |
+| `adoption.adopters_count_updated` | Date the counts were taken. |
+| `adoption.data_producers_registry_url` | URL of a public list of data producers. |
+| `adoption.data_consumers_registry_url` | URL of a public list of data consumers. |
+| `adoption.history` | Past counts that the repository's history does not record, or records wrongly: a list of rows with `date` (`YYYY-MM-DD`), `data_producers` and `data_consumers` (0 when left out). Each date appears once. See [Adoption history](#adoption-history). |
 | `adoption.confirmed_by_maintainer` | `true` or `false`; leave out when unknown. |
 | `principles.<id>.verdict` | One block per principle in `principles.csv`: `compliant`, `partially_compliant`, `not_compliant`, `unknown` or `not_assessed` (the default when left out). |
 | `principles.<id>.rationale` | Why the verdict was given. Published as written. |
 | `principles.<id>.evidence_url` | URL supporting the verdict. |
 | `# Description` | What the specification is for, in Markdown. Its first paragraph is the summary in the registry list. |
+
+### Adoption history
+
+The chart under "Adoption" on a specification page is built from three
+layers, each replacing the one before for a date they share:
+
+1. The repository's git history: every committed change to the counts is a
+   point, dated by `adopters_count_updated` (or by the commit when it is
+   missing). Files written before data consumers were counted apart have one
+   `adopters_count`; it is read as data producers.
+2. The counts in the file as it is now.
+3. The rows of `adoption.history`, to add dates the repository does not know
+   about or to correct a count that was wrong when it was committed.
+
+In the page editor, "Adopters history" opens these points as a table: type
+over a value to correct it, add a row, or import a CSV file with the columns
+`date,data_producers,data_consumers` (comma, semicolon or tab separated; a
+single count column is read as data producers). A CSV value for a date
+already in the table overwrites it. The newest row becomes the current count,
+and only rows that differ from what git records are written to the file.
 
 `make specs-check` warns, without failing, when `status` disagrees with the
 verdicts: `compliant` when every principle is compliant, `not_compliant` when
@@ -154,7 +182,7 @@ file has a `principles.<id>` block for each of them.
 ## Ranking
 
 The registry lists specifications with the most known adopters
-(`adoption.adopters_count`) first. Those without a count follow, ordered by a
+(data producers plus data consumers) first. Those without a count follow, ordered by a
 ranking score. The score only decides that order: it is not shown on the site
 and not published in the API.
 
