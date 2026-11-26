@@ -2,8 +2,13 @@
 
 Every change to a file in data/ is a commit, so the history of a value needs
 no extra bookkeeping: each revision of a specification file is read back and
-parsed like the current one. Only the known adopters count is tracked today,
-for the chart in the Adoption section of each specification page.
+parsed like the current one. Only the known adopters counts (data producers
+and data consumers) are tracked today, for the chart in the Adoption section
+of each specification page.
+
+The file's own `adoption.history` rows come on top: they fill in dates the
+repository does not know about, and replace its value for a date they share,
+so a count that was wrong when it was committed can be corrected.
 
 Everything here is best effort. Without git, outside a clone, or in a shallow
 clone the history is simply shorter or empty, and the page leaves the chart
@@ -56,25 +61,37 @@ def _blobs(refs):
     return out
 
 
+def _whole(value):
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+
+
 def _adopters(text):
+    """(producers, consumers, count date) in one revision of a file.
+
+    Before data consumers were counted apart, the file had one
+    `adopters_count`; it counted data producers, and is read as such.
+    """
     try:
         front, _sections = spec_data.parse_entry(text)
     except Exception:       # a broken revision is skipped, not fatal
-        return None, None
+        return None
     adoption = front.get("adoption") if isinstance(front, dict) else None
     if not isinstance(adoption, dict):
-        return None, None
-    count = adoption.get("adopters_count")
-    if not isinstance(count, int) or isinstance(count, bool) or count < 0:
-        return None, None
-    return count, spec_data.as_text(adoption.get("adopters_count_updated")) or None
+        return None
+    producers = _whole(adoption.get("data_producers_count",
+                                    adoption.get("adopters_count")))
+    consumers = _whole(adoption.get("data_consumers_count"))
+    if producers is None and consumers is None:
+        return None
+    return (producers or 0, consumers or 0,
+            spec_data.as_text(adoption.get("adopters_count_updated")) or None)
 
 
 def _committed_counts():
-    """{path: [(count, count date or None, commit date), ...]} from git.
+    """{path: [(producers, consumers, count date or None, commit date), ...]}.
 
-    A revision that leaves the count and its date as they were (any other edit
-    to the file) is not a new count, so it is skipped.
+    A revision that leaves the counts and their date as they were (any other
+    edit to the file) is not a new count, so it is skipped.
     """
     try:
         head = _git(["rev-parse", "HEAD"]).decode().strip()
@@ -92,28 +109,51 @@ def _committed_counts():
         for path, revs in revisions.items():
             for sha, date in revs:
                 text = blobs.get("%s:%s" % (sha, path))
-                count, updated = _adopters(text) if text else (None, None)
+                found = _adopters(text) if text else None
                 seen = counts.setdefault(path, [])
-                if count is not None and (not seen or seen[-1][:2] != (count, updated)):
-                    seen.append((count, updated, date))
+                if found is not None and (not seen or seen[-1][:3] != found):
+                    seen.append(found + (date,))
         _CACHE.clear()
         _CACHE[head] = counts
     return _CACHE[head]
 
 
+def _point(date, producers, consumers, source):
+    return {"date": date, "data_producers": producers, "data_consumers": consumers,
+            "count": producers + consumers, "source": source}
+
+
+def committed_series(spec):
+    """The counts the repository's history records, one point per date.
+
+    The date is the one the count was taken (`adopters_count_updated`) when
+    the file gives one, otherwise the date of the commit that recorded it. A
+    later value for the same date replaces the earlier one.
+    """
+    points = {}
+    for producers, consumers, updated, date in _committed_counts().get(spec["source_path"], []):
+        points[updated or date] = _point(updated or date, producers, consumers, "git")
+    return [points[d] for d in sorted(points)]
+
+
 def adopters_series(spec, today=None):
     """Known adopters over time for one specification, oldest first.
 
-    One point per date: the date the count was taken (`adopters_count_updated`)
-    when the file gives one, otherwise the date of the commit that recorded
-    it. The file as it is now is the last point, so a local edit shows up in a
-    preview before it is committed. A later value for the same date replaces
-    the earlier one, because that is a correction rather than a new count.
+    Three layers, each replacing the one before for a date they share: the
+    repository's history, the counts in the file as it is now (so a local
+    edit shows up in a preview before it is committed), and the rows of the
+    file's `adoption.history`.
     """
-    committed = _committed_counts().get(spec["source_path"], [])
-    points = dict((updated or date, count) for count, updated, date in committed)
-    current = (spec["adopters_count"], spec["adopters_count_updated"])
-    if current[0] is not None and (not committed or committed[-1][:2] != current):
+    points = dict((p["date"], p) for p in committed_series(spec))
+    producers, consumers = spec["data_producers_count"], spec["data_consumers_count"]
+    if producers is not None or consumers is not None:
         import datetime
-        points[current[1] or today or datetime.date.today().isoformat()] = current[0]
-    return [{"date": d, "count": points[d]} for d in sorted(points)]
+        date = spec["adopters_count_updated"] or today or datetime.date.today().isoformat()
+        current = _point(date, producers or 0, consumers or 0, "current")
+        if date not in points or (points[date]["data_producers"], points[date]["data_consumers"]) \
+                != (current["data_producers"], current["data_consumers"]):
+            points[date] = current
+    for row in spec.get("adopters_history") or []:
+        points[row["date"]] = _point(row["date"], row["data_producers"], row["data_consumers"],
+                                     "manual")
+    return [points[d] for d in sorted(points)]

@@ -14,9 +14,9 @@ first_release_year: 2020
 adoption:
   lifecycle: active
   tier: hundred_plus
-  adopters_count: 126
+  data_producers_count: 126
   adopters_count_updated: '2026-11-10'
-  adopters_registry_url: https://mobilitydatabase.org/feeds?features=Booking+Rules%2CFixed-Stops+Demand+Responsive+Transit%2CPredefined+Routes+with+Deviation%2CZone-Based+Demand+Responsive+Services&official=true
+  data_producers_registry_url: https://mobilitydatabase.org/feeds?features=Booking+Rules%2CFixed-Stops+Demand+Responsive+Transit%2CPredefined+Routes+with+Deviation%2CZone-Based+Demand+Responsive+Services&official=true
   confirmed_by_maintainer: true
 principles:
   cost_restriction_free:

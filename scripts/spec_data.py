@@ -46,8 +46,12 @@ GITHUB_BRANCH = "main"
 # ("maintainer:" for "maintainers:") fails the check instead of vanishing.
 SPEC_KEYS = ("short_name", "full_name", "homepage_url", "status", "modes", "maintainers",
              "licences", "licence_evidence_url", "first_release_year", "adoption", "principles")
-ADOPTION_KEYS = ("lifecycle", "tier", "adopters_count", "adopters_count_updated",
-                 "adopters_registry_url", "confirmed_by_maintainer")
+ADOPTION_KEYS = ("lifecycle", "tier", "data_producers_count", "data_consumers_count",
+                 "adopters_count_updated", "data_producers_registry_url",
+                 "data_consumers_registry_url", "confirmed_by_maintainer", "history")
+# One row of `adoption.history`: the counts on a date, entered by hand to fill
+# in or correct what the repository's own history says (scripts/spec_history.py).
+HISTORY_KEYS = ("date", "data_producers", "data_consumers")
 PRINCIPLE_KEYS = ("verdict", "rationale", "evidence_url")
 LICENCE_KEYS = ("id", "scopes")
 ORG_KEYS = ("name", "short_name", "type", "roles", "url", "logo_url")
@@ -252,6 +256,47 @@ class Registry(object):
                 self.error(where, "unknown key %s%r (expected one of %s)"
                            % (label + "." if label else "", key, ", ".join(allowed)))
         return block
+
+    def _count(self, where, column, value):
+        """A whole number of adopters, or None when it is not given."""
+        if value is None:
+            return None
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            self.error(where, "%s must be a whole number" % column)
+            return None
+        return value
+
+    def _history(self, where, rows):
+        """`adoption.history`: [{date, data_producers, data_consumers}], by date.
+
+        A count left out of a row is 0. Each date appears once, because a row
+        replaces whatever the repository's history says for that date.
+        """
+        if rows is None:
+            return []
+        if not isinstance(rows, list):
+            self.error(where, "adoption.history must be a list of rows")
+            return []
+        out, seen = [], set()
+        for n, row in enumerate(rows):
+            label = "adoption.history[%d]" % n
+            row = self._keys(where, row, HISTORY_KEYS, label)
+            date = as_text(row.get("date"))
+            if not _DATE_RE.match(date):
+                self.error(where, "%s.date must be a YYYY-MM-DD date" % label)
+                continue
+            if date in seen:
+                self.error(where, "%s: %s appears more than once" % (label, date))
+                continue
+            seen.add(date)
+            producers = self._count(where, label + ".data_producers", row.get("data_producers"))
+            consumers = self._count(where, label + ".data_consumers", row.get("data_consumers"))
+            if producers is None and consumers is None:
+                self.error(where, "%s has no count" % label)
+                continue
+            out.append({"date": date, "data_producers": producers or 0,
+                        "data_consumers": consumers or 0})
+        return sorted(out, key=lambda r: r["date"])
 
     def _read(self, folder, key, path):
         where = entry_path(folder, key)
@@ -475,17 +520,21 @@ class Registry(object):
             self.error(where, "adoption.confirmed_by_maintainer must be true or false")
         confirmed = {True: "yes", False: "no"}.get(raw_confirmed, "unknown")
 
-        adopters_count = adoption.get("adopters_count")
-        if adopters_count is not None and (not isinstance(adopters_count, int)
-                                           or isinstance(adopters_count, bool)
-                                           or adopters_count < 0):
-            self.error(where, "adoption.adopters_count must be a whole number")
-            adopters_count = None
+        producers = self._count(where, "adoption.data_producers_count",
+                                adoption.get("data_producers_count"))
+        consumers = self._count(where, "adoption.data_consumers_count",
+                                adoption.get("data_consumers_count"))
+        # Known adopters are both kinds together; unknown only when neither is given.
+        adopters_count = (None if producers is None and consumers is None
+                          else (producers or 0) + (consumers or 0))
         updated = as_text(adoption.get("adopters_count_updated"))
         if updated and not _DATE_RE.match(updated):
             self.error(where, "adoption.adopters_count_updated must be a YYYY-MM-DD date")
-        registry = as_text(adoption.get("adopters_registry_url"))
-        self._url(where, "adoption.adopters_registry_url", registry)
+        producers_registry = as_text(adoption.get("data_producers_registry_url"))
+        self._url(where, "adoption.data_producers_registry_url", producers_registry)
+        consumers_registry = as_text(adoption.get("data_consumers_registry_url"))
+        self._url(where, "adoption.data_consumers_registry_url", consumers_registry)
+        history = self._history(where, adoption.get("history"))
 
         year = front.get("first_release_year")
         if year is not None and not (isinstance(year, int) and 1900 <= year <= 2100):
@@ -529,9 +578,14 @@ class Registry(object):
             "lifecycle_hint": LIFECYCLE[lifecycle]["hint"] if lifecycle else None,
             "adoption_tier": tier,
             "adoption_tier_label": ADOPTION_TIER[tier]["label"] if tier else None,
-            "adopters_registry": registry or None,
+            "adopters_registry": producers_registry or consumers_registry or None,
+            "data_producers_registry": producers_registry or None,
+            "data_consumers_registry": consumers_registry or None,
             "adopters_count": adopters_count,
+            "data_producers_count": producers,
+            "data_consumers_count": consumers,
             "adopters_count_updated": updated or None,
+            "adopters_history": history,
             "first_release_year": year,
             "licences": licences,
             "licence_ids": [l["id"] for l in licences],
