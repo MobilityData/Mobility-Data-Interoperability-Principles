@@ -49,6 +49,12 @@ SPEC_KEYS = ("short_name", "full_name", "homepage_url", "status", "modes", "main
 ADOPTION_KEYS = ("lifecycle", "tier", "data_producers_count", "data_consumers_count",
                  "adopters_count_updated", "data_producers_registry_url",
                  "data_consumers_registry_url", "confirmed_by_maintainer", "history")
+# Keys from an older format, so the check can name the new one. Known adopters
+# used to be counted as one number, which counted data producers.
+RENAMED_KEYS = {
+    ("adoption", "adopters_count"): "data_producers_count",
+    ("adoption", "adopters_registry_url"): "data_producers_registry_url",
+}
 # One row of `adoption.history`: the counts on a date, entered by hand to fill
 # in or correct what the repository's own history says (scripts/spec_history.py).
 HISTORY_KEYS = ("date", "data_producers", "data_consumers")
@@ -252,7 +258,13 @@ class Registry(object):
             self.error(where, "%s must be a set of key: value pairs" % (label or "block"))
             return {}
         for key in block:
-            if key not in allowed:
+            if key in allowed:
+                continue
+            renamed = RENAMED_KEYS.get((label, key))
+            if renamed:
+                self.error(where, "%s.%s has been renamed to %s.%s (same value)"
+                           % (label, key, label, renamed))
+            else:
                 self.error(where, "unknown key %s%r (expected one of %s)"
                            % (label + "." if label else "", key, ", ".join(allowed)))
         return block
