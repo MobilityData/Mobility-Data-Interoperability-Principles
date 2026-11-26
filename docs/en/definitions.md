@@ -24,6 +24,10 @@ In developing the Principles and related resources, the MDIP coalition has adopt
 
      Examples include the General Transit Feed Specification (GTFS), Mobility Data Specification (MDS), and General Bikeshare Feed Specification (GBFS).
 
+<a name="independent_organization"></a>
+**Independent organization**
+:   For the purposes of the open standard definition, an independent organization is one whose decisions on the content of the specification are not controlled by any single company, funder, or group with a commercial stake in that content. This can be demonstrated by evidence such as publicly documented governance, board composition, and funding sources.
+
 ## Stakeholders and Impacted Products
 
 <a name="mobility_service_provider"></a>
