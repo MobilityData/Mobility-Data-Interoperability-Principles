@@ -17,6 +17,10 @@ adoption:
   adopters_count_updated: '2026-11-04'
   data_producers_registry_url: https://www.openmobilityfoundation.org/mds-users/
   confirmed_by_maintainer: true
+  history:
+    - date: '2026-09-28'
+      data_producers: 1200
+      data_consumers: 0
 principles:
   cost_restriction_free:
     verdict: compliant
