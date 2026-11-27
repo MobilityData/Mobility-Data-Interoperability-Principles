@@ -207,7 +207,9 @@
     function autoRules(path) {
       if (isNew && path === "id") { idByHand = !empty(get(doc, "id")); }
       if (isNew && path === "short_name" && !idByHand) { set(doc, "id", slug(get(doc, path) || "")); }
-      if (COUNT_FIELDS.test(path) && typeof get(doc, path) === "number") {
+      /* Also when one count is cleared and the other is still known: the
+         total changed, so it is a new count dated today. */
+      if (COUNT_FIELDS.test(path) && totalAdopters() !== null) {
         set(doc, "adoption.adopters_count_updated", today());
         /* A row of the history table for today would hide the new count. */
         set(doc, "adoption.history", (get(doc, "adoption.history") || []).filter(function (r) {
@@ -266,7 +268,13 @@
       });
       var pr = get(doc, "adoption.data_producers_count");
       var co = get(doc, "adoption.data_consumers_count");
-      if (typeof pr === "number" || typeof co === "number") {
+      /* Counts as last committed are already a point from git; without a
+         count date they would otherwise come back dated today. */
+      var last = cfg.history_last;
+      var unchanged = last && last.data_producers === (pr || 0) &&
+        last.data_consumers === (co || 0) &&
+        (last.updated || "") === String(get(doc, "adoption.adopters_count_updated") || "");
+      if ((typeof pr === "number" || typeof co === "number") && !unchanged) {
         var date = String(get(doc, "adoption.adopters_count_updated") || today());
         var was = points[date];
         if (!was || was.p !== (pr || 0) || was.c !== (co || 0)) { put(date, pr, co, "current"); }
@@ -1576,7 +1584,9 @@
         var updated = String(get(doc, "adoption.adopters_count_updated") || "");
         var newest = clean[clean.length - 1];
         var current = null;
-        var same = newest && newest.source === "current" &&
+        /* The same counts as now are not a new measurement: the date is
+           left as it is, whichever row they come from. */
+        var same = newest &&
           newest.p === (get(doc, "adoption.data_producers_count") || 0) &&
           newest.c === (get(doc, "adoption.data_consumers_count") || 0);
         if (newest && newest.date >= updated) {
@@ -1584,7 +1594,8 @@
         }
         if (current && !same) {
           also["adoption.data_producers_count"] = newest.p;
-          also["adoption.data_consumers_count"] = newest.c || null;
+          /* 0 is a known count, not an unknown one. */
+          also["adoption.data_consumers_count"] = newest.c;
           also["adoption.adopters_count_updated"] = newest.date;
         }
         /* Keep what git does not already say for that date. */

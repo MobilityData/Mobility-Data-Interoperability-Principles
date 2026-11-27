@@ -706,7 +706,8 @@ def render_detail(spec, data, base, new=False):
     sections = [("glance", "At a glance", "information-outline"),
                 ("criteria", "MDIP criteria", "shield-check"),
                 ("licensing", "Licensing", "scale-balance")]
-    if spec["adoption_tier_label"] or spec["adopters_count"] or spec["adopters_registry"]:
+    if (spec["adoption_tier_label"] or spec["adopters_count"] or spec["adopters_registry"]
+            or len(spec_history.adopters_series(spec)) >= 2):
         sections.append(("adoption", "Adoption", "account-group"))
     if spec["maintainers"]:
         sections.append(("maintainers", "Maintainers", "domain"))
@@ -855,8 +856,10 @@ def render_detail(spec, data, base, new=False):
 
     # ---- adoption
     # Always rendered, so the editor can fill it in; hidden when empty.
+    # History alone (rows in `adoption.history`, no current count) is enough.
+    series = spec_history.adopters_series(spec)
     has_adoption = bool(spec["adoption_tier_label"] or spec["adopters_count"]
-                        or spec["adopters_registry"])
+                        or spec["adopters_registry"] or len(series) >= 2)
     o.append('<section class="spec-section" id="adoption"%s>' % edit_only(not has_adoption))
     o.append('<h2 class="spec-h2">%s<span>Adoption</span></h2>' % icon("account-group"))
     o.append('<dl class="glance">')
@@ -889,7 +892,6 @@ def render_detail(spec, data, base, new=False):
                            ext_link(registry, "Open registry") if registry else ""),
                         empty=n is None and not registry))
     o.append("</dl>")
-    series = spec_history.adopters_series(spec)
     o.append('<div class="adopt-hist"%s><h3>%s<span>History</span></h3><div%s>%s</div></div>'
              % (edit_only(len(series) < 2), icon("chart-line"),
                 field_attrs("adoption.history", view="chart"),
@@ -1002,6 +1004,11 @@ def edit_config(spec, data, new=False):
             dict(date=p["date"], data_producers=p["data_producers"],
                  data_consumers=p["data_consumers"])
             for p in spec_history.committed_series(spec)],
+        # The counts as last committed, so the editor does not add them again
+        # as a point dated today (see spec_history.adopters_series).
+        "history_last": (lambda last: last and dict(
+            data_producers=last[0], data_consumers=last[1], updated=last[2]))(
+            None if new else spec_history.last_committed(spec)),
         "description": sections.get("Description", ""),
         "labels": labels,
         "status": [dict(id=k, label=v["label"], tone=v["tone"])
