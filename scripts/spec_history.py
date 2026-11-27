@@ -136,6 +136,12 @@ def committed_series(spec):
     return [points[d] for d in sorted(points)]
 
 
+def last_committed(spec):
+    """(producers, consumers, count date or None) as last committed, or None."""
+    counts = _committed_counts().get(spec["source_path"], [])
+    return counts[-1][:3] if counts else None
+
+
 def adopters_series(spec, today=None):
     """Known adopters over time for one specification, oldest first.
 
@@ -146,7 +152,12 @@ def adopters_series(spec, today=None):
     """
     points = dict((p["date"], p) for p in committed_series(spec))
     producers, consumers = spec["data_producers_count"], spec["data_consumers_count"]
-    if producers is not None or consumers is not None:
+    # Counts as they were last committed are already a point, at the date
+    # they were counted or committed; without a count date they would
+    # otherwise come back as a new point dated today on every build.
+    unchanged = last_committed(spec) == (producers or 0, consumers or 0,
+                                         spec["adopters_count_updated"])
+    if (producers is not None or consumers is not None) and not unchanged:
         import datetime
         date = spec["adopters_count_updated"] or today or datetime.date.today().isoformat()
         current = _point(date, producers or 0, consumers or 0, "current")

@@ -158,6 +158,17 @@ _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _HEADING_RE = re.compile(r"^#\s+(.+?)\s*$", re.M)
 
 
+def valid_date(text):
+    """True for a real YYYY-MM-DD calendar date: not 2024-02-30."""
+    if not _DATE_RE.match(text or ""):
+        return False
+    try:
+        _dt.date.fromisoformat(text)
+    except ValueError:
+        return False
+    return True
+
+
 def github_url(kind, path=""):
     """Link to the repository: kind is blob, edit, new, tree or issues/new."""
     if kind == "issues/new":
@@ -294,8 +305,8 @@ class Registry(object):
             label = "adoption.history[%d]" % n
             row = self._keys(where, row, HISTORY_KEYS, label)
             date = as_text(row.get("date"))
-            if not _DATE_RE.match(date):
-                self.error(where, "%s.date must be a YYYY-MM-DD date" % label)
+            if not valid_date(date):
+                self.error(where, "%s.date must be a real YYYY-MM-DD date" % label)
                 continue
             if date in seen:
                 self.error(where, "%s: %s appears more than once" % (label, date))
@@ -540,8 +551,10 @@ class Registry(object):
         adopters_count = (None if producers is None and consumers is None
                           else (producers or 0) + (consumers or 0))
         updated = as_text(adoption.get("adopters_count_updated"))
-        if updated and not _DATE_RE.match(updated):
-            self.error(where, "adoption.adopters_count_updated must be a YYYY-MM-DD date")
+        if updated and not valid_date(updated):
+            # Left out rather than kept: the chart reads it as a date.
+            self.error(where, "adoption.adopters_count_updated must be a real YYYY-MM-DD date")
+            updated = ""
         producers_registry = as_text(adoption.get("data_producers_registry_url"))
         self._url(where, "adoption.data_producers_registry_url", producers_registry)
         consumers_registry = as_text(adoption.get("data_consumers_registry_url"))
